@@ -1,0 +1,11 @@
+framework module yandex_mapkit {
+  umbrella header "yandex_mapkit-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module yandex_mapkit.Swift {
+    header "yandex_mapkit-Swift.h"
+    requires objc
+}

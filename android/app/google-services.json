@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "42637991338",
+    "project_id": "wallet-box-742a7",
+    "storage_bucket": "wallet-box-742a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42637991338:android:b709e17aed9620aa7c5fd3",
+        "android_client_info": {
+          "package_name": "walletbox.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "42637991338-0v8mdi62354gap72prek3bpilikfie3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvKeFuBK528AY507YHH-6nra8XRM0WKV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "42637991338-0v8mdi62354gap72prek3bpilikfie3b.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "42637991338-3uum75j43om2ot9o1f7pp0p1a6on8t1a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "walletbox.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
