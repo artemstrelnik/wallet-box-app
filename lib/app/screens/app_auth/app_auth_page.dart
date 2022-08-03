@@ -297,7 +297,7 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
     );
 
     // Create an `OAuthCredential` from the credential returned by Apple.
-    final oauthCredential = OAuthProvider("apple.com").credential(
+    final oauthCredential = await OAuthProvider("apple.com").credential(
       idToken: appleCredential.identityToken,
       rawNonce: rawNonce,
     );
@@ -308,22 +308,29 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
   }
 
   Future<UserCredential?> signInWithGoogle() async {
+    // GoogleSignIn _googleSignIn = GoogleSignIn(
+    // ...
+    // // The OAuth client id of your app. This is required.
+    // clientId: ...,
+    // // If you need to authenticate to a backend server, specify its OAuth client. This is optional.
+    // serverClientId: ...,
+    // );
+
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn().signIn().catchError((error) {
       print('AN ERROR OCCURED');
     });
-    print(googleUser);
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
-    print(googleAuth);
+
     // Create a new credential
-    final OAuthCredential? credential = GoogleAuthProvider.credential(
+    final OAuthCredential? credential = await GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
-    print(credential);
+
     if (credential != null) {
       return await FirebaseAuth.instance.signInWithCredential(credential);
     }
