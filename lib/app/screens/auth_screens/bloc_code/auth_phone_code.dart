@@ -1,20 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_loader/screen_loader.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
-import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
+import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
 import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
@@ -27,10 +23,10 @@ import 'package:wallet_box/app/screens/home_screen/home_screen_bloc.dart';
 import 'package:wallet_box/app/screens/password_restore_final/password_restore_final_bloc.dart';
 import 'package:wallet_box/app/screens/password_restore_final/password_restore_final_page.dart';
 
+import '../bloc_email/auth_email_bloc.dart';
 import '../bloc_email/auth_phone_email.dart';
 import 'auth_code_events.dart';
 import 'auth_code_states.dart';
-import '../bloc_email/auth_email_bloc.dart';
 
 class AuthPhoneCode extends StatefulWidget {
   const AuthPhoneCode({Key? key}) : super(key: key);

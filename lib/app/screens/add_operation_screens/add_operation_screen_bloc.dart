@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/bill_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/categories_by_uid_interactor.dart';
@@ -154,11 +155,12 @@ class AddOperationScreenBloc
       String? token = await prefs.getString("wallet_box_token");
       if (token != null) {
         _token = token;
+        Logger().w(_selectedBill.toString());
         Map<String, String> _body = {
           "action": event.type.toString().split(".").last,
           "amount": event.sum.split(".").first,
           "cents": event.sum.split(".").length == 1
-              ? "00"
+              ? "0"
               : event.sum.split(".").last,
           "currency": "RUB",
           "billId": _selectedBill!.id,
@@ -210,7 +212,7 @@ class AddOperationScreenBloc
         Map<String, String> _body = {
           "amount": event.sum.split(",").first,
           "cents": event.sum.split(",").length == 1
-              ? "00"
+              ? "0"
               : event.sum.split(",").last,
         };
         if (event.desc.isNotEmpty) {
@@ -233,6 +235,9 @@ class AddOperationScreenBloc
         } else if (_selectedBill == null) {
           emit(GoBillCreate());
         } else {
+          Logger().i(_selectedBill?.id.toString());
+          Logger().w(_body.toString());
+          Logger().w(event.type.toString());
           final bool? _responce = await BillInteractor().createOperation(
             body: _body,
             token: _token,

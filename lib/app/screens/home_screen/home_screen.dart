@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
@@ -109,6 +111,15 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
       });
     }
     initializeDateFormatting("ru");
+    checkUser();
+  }
+
+  checkUser()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final String? uid = prefs.getString("wallet_box_uid");
+    final String? token = prefs.getString("wallet_box_token");
+    Logger().i("uid => $uid  token => $token");
   }
 
   @override

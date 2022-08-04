@@ -1,6 +1,5 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
-import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 
 enum StyleColorEnum {

@@ -11,7 +11,6 @@ class CustomThemes {
         ),
         scaffoldBackgroundColor: CustomColors.lightPrimaryBackground,
         primaryColor: CustomColors.lightPrimaryBackground,
-        primaryColorBrightness: Brightness.light,
         backgroundColor: CustomColors.lightPrimaryBackground,
         brightness: Brightness.light,
       );
@@ -23,7 +22,6 @@ class CustomThemes {
         scaffoldBackgroundColor: CustomColors.darkPrimaryBackground,
         backgroundColor: CustomColors.darkSecondaryBackground,
         primaryColor: CustomColors.darkSecondaryBackground,
-        primaryColorBrightness: Brightness.dark,
         primaryColorLight: CustomColors.darkSecondaryBackground,
         brightness: Brightness.dark,
       );

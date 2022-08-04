@@ -1,5 +1,4 @@
 import 'package:wallet_box/app/data/net/models/categories_colors_model.dart';
-import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 
 class CatigoriesResponce {
   CatigoriesResponce({

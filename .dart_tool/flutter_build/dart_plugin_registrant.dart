@@ -6,10 +6,19 @@
 // @dart = 2.17
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
+import 'package:camera_android/camera_android.dart';
+import 'package:geolocator_android/geolocator_android.dart';
+import 'package:google_sign_in_android/google_sign_in_android.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:local_auth_android/local_auth_android.dart';
 import 'package:path_provider_android/path_provider_android.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
 import 'package:url_launcher_android/url_launcher_android.dart';
+import 'package:camera_avfoundation/camera_avfoundation.dart';
+import 'package:geolocator_apple/geolocator_apple.dart';
+import 'package:google_sign_in_ios/google_sign_in_ios.dart';
 import 'package:image_picker_ios/image_picker_ios.dart';
+import 'package:local_auth_ios/local_auth_ios.dart';
 import 'package:path_provider_ios/path_provider_ios.dart';
 import 'package:shared_preferences_ios/shared_preferences_ios.dart';
 import 'package:url_launcher_ios/url_launcher_ios.dart';
@@ -19,6 +28,7 @@ import 'package:url_launcher_linux/url_launcher_linux.dart';
 import 'package:path_provider_macos/path_provider_macos.dart';
 import 'package:shared_preferences_macos/shared_preferences_macos.dart';
 import 'package:url_launcher_macos/url_launcher_macos.dart';
+import 'package:local_auth_windows/local_auth_windows.dart';
 import 'package:path_provider_windows/path_provider_windows.dart';
 import 'package:shared_preferences_windows/shared_preferences_windows.dart';
 import 'package:url_launcher_windows/url_launcher_windows.dart';
@@ -29,6 +39,56 @@ class _PluginRegistrant {
   @pragma('vm:entry-point')
   static void register() {
     if (Platform.isAndroid) {
+      try {
+        AndroidCamera.registerWith();
+      } catch (err) {
+        print(
+          '`camera_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        GeolocatorAndroid.registerWith();
+      } catch (err) {
+        print(
+          '`geolocator_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        GoogleSignInAndroid.registerWith();
+      } catch (err) {
+        print(
+          '`google_sign_in_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        ImagePickerAndroid.registerWith();
+      } catch (err) {
+        print(
+          '`image_picker_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        LocalAuthAndroid.registerWith();
+      } catch (err) {
+        print(
+          '`local_auth_android` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
       try {
         PathProviderAndroid.registerWith();
       } catch (err) {
@@ -61,10 +121,50 @@ class _PluginRegistrant {
 
     } else if (Platform.isIOS) {
       try {
+        AVFoundationCamera.registerWith();
+      } catch (err) {
+        print(
+          '`camera_avfoundation` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        GeolocatorApple.registerWith();
+      } catch (err) {
+        print(
+          '`geolocator_apple` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        GoogleSignInIOS.registerWith();
+      } catch (err) {
+        print(
+          '`google_sign_in_ios` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
         ImagePickerIOS.registerWith();
       } catch (err) {
         print(
           '`image_picker_ios` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
+      try {
+        LocalAuthIOS.registerWith();
+      } catch (err) {
+        print(
+          '`local_auth_ios` threw an error: $err. '
           'The app may not function as expected until you remove this plugin from pubspec.yaml'
         );
         rethrow;
@@ -163,6 +263,16 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isWindows) {
+      try {
+        LocalAuthWindows.registerWith();
+      } catch (err) {
+        print(
+          '`local_auth_windows` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+        rethrow;
+      }
+
       try {
         PathProviderWindows.registerWith();
       } catch (err) {

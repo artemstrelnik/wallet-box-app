@@ -1,10 +1,15 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:math';
+
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,14 +18,12 @@ import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/api.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/screens/add_invoice_screens/add_invoice_bloc.dart';
-import 'package:wallet_box/app/screens/add_operation_screens/add_operation_screen.dart';
-import 'package:wallet_box/app/screens/add_operation_screens/add_operation_screen_bloc.dart';
 import 'package:wallet_box/app/screens/app_auth/app_auth_bloc.dart';
 import 'package:wallet_box/app/screens/app_auth/app_auth_page.dart';
 import 'package:wallet_box/app/screens/auth_screens/bloc_code/auth_code_bloc.dart';
 import 'package:wallet_box/app/screens/auth_screens/bloc_code/auth_phone_code.dart';
-import 'package:wallet_box/app/screens/auth_screens/bloc_phone/auth_phone.dart';
 import 'package:wallet_box/app/screens/auth_screens/bloc_phone/auth_bloc.dart';
+import 'package:wallet_box/app/screens/auth_screens/bloc_phone/auth_phone.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen_bloc.dart';
 import 'package:wallet_box/app/screens/pin_code/pin_code_bloc.dart';
@@ -28,14 +31,8 @@ import 'package:wallet_box/app/screens/pin_code/pin_code_page.dart';
 import 'package:wallet_box/app/screens/settings_screens/subscription_screen/subscription_screen.dart';
 import 'package:wallet_box/app/screens/settings_screens/subscription_screen/subscription_screen_bloc.dart';
 import 'package:wallet_box/app/screens/splash_screens/splash_screen.dart';
-//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-//import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:app_links/app_links.dart';
 import 'package:wallet_box/app/screens/synchronization/synchronization_page.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:home_widget/home_widget.dart';
-import 'dart:math';
-import 'dart:io';
 
 import 'my_app_bloc.dart';
 import 'my_app_events.dart';
@@ -205,8 +202,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       authenticated = await auth.authenticate(
         localizedReason: 'чтобы войти в приложение',
-        useErrorDialogs: true,
-        stickyAuth: true,
       );
       if (authenticated) {
         context.read<MyAppBloc>().add(

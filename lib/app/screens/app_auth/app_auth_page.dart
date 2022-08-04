@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -166,11 +167,19 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                     .copyWith(color: CustomColors.lightPrimaryText),
                 backgroundColor: CustomColors.googleButton,
                 onTap: () async {
+                  Logger().i("message");
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                  final String? uid = prefs.getString("wallet_box_uid");
+                  final String? token = prefs.getString("wallet_box_token");
+                  Logger().i("uid => $uid  token => $token");
                   final UserCredential? _userInfo = await signInWithGoogle();
                   if (_userInfo != null) {
                     context.read<AppAuthBloc>().add(
                           CheckUserEvent(
-                              info: _userInfo, type: UserType.GOOGLE),
+                            info: _userInfo,
+                            type: UserType.GOOGLE,
+                          ),
                         );
                   }
                 },
@@ -183,12 +192,14 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                     .setStyleByEnum(context, StyleColorEnum.appleButtonColors),
                 border: true,
                 onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                              create: (context) => AuthBloc(),
-                              child: const AuthPhone(),
-                            ))),
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (context) => AuthBloc(),
+                      child: const AuthPhone(),
+                    ),
+                  ),
+                ),
               ),
               _customButton(
                 "Забыли пароль?",
@@ -317,13 +328,12 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
     // );
 
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser =
-        await GoogleSignIn().signIn().catchError((error) {
-      print('AN ERROR OCCURED');
-    });
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
+
+    Logger().i(googleUser.toString());
 
     // Create a new credential
     final OAuthCredential? credential = await GoogleAuthProvider.credential(

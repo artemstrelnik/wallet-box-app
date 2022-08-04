@@ -1,5 +1,4 @@
 import 'package:wallet_box/app/data/net/models/currenci_model.dart';
-import 'package:wallet_box/app/data/net/models/groups_list_response.dart';
 import 'package:wallet_box/app/data/net/models/my_subscription_variable.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 

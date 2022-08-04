@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/api.dart';
@@ -57,7 +58,7 @@ class AppAuthBloc extends Bloc<AppAuthEvent, AppAuthState> {
   ) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-
+       Logger().i("_startCreateUser");
       prefs.remove("wallet_box_uid");
       prefs.remove("wallet_box_token");
       Session().removeToken();
@@ -75,6 +76,7 @@ class AppAuthBloc extends Bloc<AppAuthEvent, AppAuthState> {
           await prefs.setString("wallet_box_uid", _user.data!.user.id);
           await prefs.setString("wallet_box_token", _user.data!.token);
           prefs.setBool("not_first_launch", true);
+          Logger().i(_user.toString());
           emit(HomeEntryState(user: _user.data!.user));
         } else {
           emit(const ShowDialogState());

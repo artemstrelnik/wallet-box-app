@@ -1,7 +1,6 @@
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';
 import 'package:wallet_box/app/data/net/models/ticket_responce_model.dart';
-import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 abstract class AddOperationScreenState {

@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/api.dart';
-import 'package:wallet_box/app/data/net/interactors/notification_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/user_by_id_interactor.dart';
-import 'package:wallet_box/app/data/net/models/permissions_response.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
+
 import 'my_app_events.dart';
 import 'my_app_states.dart';
 
@@ -28,6 +28,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
 
       final String? uid = prefs.getString("wallet_box_uid");
       final String? token = prefs.getString("wallet_box_token");
+      Logger().i("uid => $uid  token => $token");
 
       if (uid != null && token != null) {
         final UserRegistrationModel? _isUserAuth =
@@ -67,6 +68,7 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final bool? not_first_launch = prefs.getBool("not_first_launch");
+      Logger().i(not_first_launch.toString());
       if (not_first_launch == null) {
         prefs.remove("wallet_box_uid");
         prefs.remove("wallet_box_token");

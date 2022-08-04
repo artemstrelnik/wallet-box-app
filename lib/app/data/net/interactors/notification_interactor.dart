@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'package:wallet_box/app/data/enum.dart';
-import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import '../api.dart';
 
 class NotificationInteractor {

@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:provider/src/provider.dart';
+import 'package:screen_loader/screen_loader.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
@@ -14,12 +13,10 @@ import 'package:wallet_box/app/core/generals_widgets/text.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
-import 'package:wallet_box/app/screens/auth_screens/bloc_email/auth_phone_email.dart';
 
 import 'delete_data_bloc.dart';
 import 'delete_data_events.dart';
 import 'delete_data_states.dart';
-import 'package:screen_loader/screen_loader.dart';
 
 class DeleteDataScreen extends StatefulWidget {
   @override

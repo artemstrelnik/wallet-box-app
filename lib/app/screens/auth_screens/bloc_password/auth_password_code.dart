@@ -1,31 +1,28 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:screen_loader/screen_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
-import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
+import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
 import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
-import 'package:wallet_box/app/screens/auth_screens/bloc_code/auth_code_bloc.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen_bloc.dart';
 
 import 'auth_password_bloc.dart';
 import 'auth_password_events.dart';
 import 'auth_password_states.dart';
-import 'package:screen_loader/screen_loader.dart';
 
 class AuthPasswordPage extends StatefulWidget {
   const AuthPasswordPage({Key? key}) : super(key: key);

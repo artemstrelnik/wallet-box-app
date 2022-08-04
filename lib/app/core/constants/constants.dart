@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 const logoLight = 'lib/app/assets/images/logo_light.png';
 const logoDark = 'lib/app/assets/images/logo_dark.png';

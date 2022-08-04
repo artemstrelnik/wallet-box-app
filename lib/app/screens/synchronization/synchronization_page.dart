@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:screen_loader/screen_loader.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
@@ -18,13 +23,6 @@ import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/screens/add_invoice_screens/add_invoice_bloc.dart';
 import 'package:wallet_box/app/screens/add_invoice_screens/add_invoice_events.dart';
 import 'package:wallet_box/app/screens/add_invoice_screens/add_invoice_states.dart';
-
-import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'dart:async';
-import 'package:screen_loader/screen_loader.dart';
-import 'package:url_launcher/link.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SynchronizationPage extends StatefulWidget {
   const SynchronizationPage({

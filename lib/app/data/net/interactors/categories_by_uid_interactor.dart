@@ -4,7 +4,7 @@ import 'dart:core';
 import 'package:wallet_box/app/data/net/models/categories_colors_model.dart';
 import 'package:wallet_box/app/data/net/models/categories_icons_model.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';
-import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
+
 import '../api.dart';
 
 class CategoriesByUidInteractor {

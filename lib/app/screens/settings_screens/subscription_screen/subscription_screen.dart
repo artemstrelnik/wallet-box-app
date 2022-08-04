@@ -1,10 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
@@ -18,8 +17,6 @@ import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/SliderModel.dart';
 import 'package:wallet_box/app/data/net/models/groups_list_response.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
-import 'package:url_launcher/link.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'subscription_screen_bloc.dart';
 import 'subscription_screen_events.dart';
@@ -27,6 +24,7 @@ import 'subscription_screen_states.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   SubscriptionScreen({Key? key}) : super(key: key);
+
   @override
   _SubscriptionScreenState createState() => _SubscriptionScreenState();
 }

@@ -1,4 +1,4 @@
-import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
+
 
 abstract class SupprotScreenState {
   const SupprotScreenState();

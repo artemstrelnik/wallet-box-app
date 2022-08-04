@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/src/provider.dart';
@@ -9,13 +7,11 @@ import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
 import 'package:wallet_box/app/core/generals_widgets/scaffold_app_bar.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
-import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 import 'package:wallet_box/app/data/net/models/currenci_model.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/screens/settings_screens/currencies_screens/currencies_screens_bloc.dart';
-import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_screen_states.dart';
 
 import 'currencies_screens_events.dart';
 import 'currencies_screens_states.dart';

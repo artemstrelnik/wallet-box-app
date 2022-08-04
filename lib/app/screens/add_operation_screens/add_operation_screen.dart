@@ -7,9 +7,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logger/logger.dart';
 
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/src/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
@@ -461,10 +463,16 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
                         onPressed: () => Navigator.pop(context)),
                     ButtonPink(
                       text: textString_10,
-                      onPressed: () {
+                      onPressed: () async {
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        final String? token =
+                            prefs.getString("wallet_box_token");
+                        Logger().i("$token");
                         if (_formKey.currentState!.validate()) {
                           if (widget.isEditing) {
                             if (widget.transaction?.bill?.bankName != null) {
+                              Logger().i("message1");
                               context.read<AddOperationScreenBloc>().add(
                                     UpdateBankOperationEvent(
                                       id: widget.transaction!.id,
@@ -473,15 +481,18 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
                                     ),
                                   );
                             } else {
+                              Logger().i("message2");
                               context.read<AddOperationScreenBloc>().add(
                                     UpdateOperationEvent(
-                                        desc: _controllerDesc.text,
-                                        sum: _controllerSum.text,
-                                        type: _transactionType.value,
-                                        id: widget.transaction!.id),
+                                      desc: _controllerDesc.text,
+                                      sum: _controllerSum.text,
+                                      type: _transactionType.value,
+                                      id: widget.transaction!.id,
+                                    ),
                                   );
                             }
                           } else {
+                            Logger().i("messag3e");
                             context.read<AddOperationScreenBloc>().add(
                                   CreateOperationEvent(
                                     desc: _controllerDesc.text,
@@ -1101,7 +1112,7 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
   SearchResultWithSession _resultList(String query) =>
       YandexSearch.searchByText(
         searchText: query,
-        geometry: const Geometry.fromBoundingBox(BoundingBox(
+        geometry: Geometry.fromBoundingBox(BoundingBox(
           southWest:
               Point(latitude: 55.76996383933034, longitude: 37.57483142322235),
           northEast: Point(

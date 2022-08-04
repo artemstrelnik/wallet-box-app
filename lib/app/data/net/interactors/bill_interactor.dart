@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import '../api.dart';
@@ -52,12 +53,17 @@ class BillInteractor {
   }) async {
     try {
       await Session().setToken(token: token);
+      Logger().e('message333333333');
       String _t = "/api/v1/bill/" + type.name.toLowerCase() + "/" + billId;
+      Logger().w(_t.toString());
+      Logger().w(body.toString());
       var response = await Session().generalPatchRequest(
         url: _t,
         body: body,
       );
+      Logger().w(response.body.toString());
       final data = json.decode(utf8.decode(response.bodyBytes));
+
       if (response.statusCode == 200) {
         final SingleBillResponse _result = SingleBillResponse.fromJson(data);
         return true;
@@ -120,7 +126,9 @@ class BillInteractor {
     BankTypes? bankType,
   }) async {
     try {
+      Logger().e("message11111111");
       await Session().setToken(token: token);
+      Logger().e(bankType?.name.toString());
       String _t =
           "/api/v1/${bankType != null ? bankType.name + "/" : ""}transaction/" +
               id;

@@ -7,8 +7,7 @@ import 'package:wallet_box/app/data/net/interactors/transaction_interactor.dart'
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
-import '../../data/net/interactors/currencies_interactor.dart';
-import '../../data/net/models/currenci_model.dart';
+
 import 'home_screen_events.dart';
 import 'home_screen_states.dart';
 

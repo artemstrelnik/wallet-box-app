@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/notification_interactor.dart';
-import 'package:wallet_box/app/data/net/interactors/sms_submit_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/user_auth_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/user_registration_interactor.dart';
-import 'package:wallet_box/app/data/net/models/sms_submit_model.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
 

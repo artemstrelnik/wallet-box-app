@@ -1,7 +1,6 @@
 import 'package:barcode/barcode.dart';
 
 import 'loyalty_response_model.dart';
-import 'user_auth_model.dart';
 
 class MyLoyaltyResponseModel {
   MyLoyaltyResponseModel({

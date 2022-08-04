@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 
 // class RolePermissionProvider with ChangeNotifier {

@@ -7,10 +7,11 @@ import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:http_parser/http_parser.dart';
 
+
 bool trustSelfSigned = true;
 HttpClient httpClient = HttpClient()
   ..badCertificateCallback =
-      ((X509Certificate cert, String host, int port) => trustSelfSigned);
+      (X509Certificate cert, String host, int port) => trustSelfSigned;
 IOClient ioClient = IOClient(httpClient);
 
 class Session {
@@ -228,12 +229,22 @@ class Session {
       _baseUrl,
       url,
     );
+    Logger().i(uri.toString());
 
-    Response response = await http.patch(
-      uri,
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    Logger().i(body.toString());
+    Logger().i(headers);
+    late Response response;
+    try {
+      response = await ioClient.patch(
+        uri,
+        headers: headers,
+        body: json.encode(body),
+      );
+    } catch (e) {
+      print('No Internet connection 😑 $e');
+    }
+
+    // Logger().i(response.body.toString());
 
     Logger().d("""Тип запроса: Patch
     Ссылка: ${uri.toString()}
@@ -261,7 +272,7 @@ class Session {
       url,
     );
 
-    Response response = await http.delete(
+    Response response = await ioClient.delete(
       uri,
       headers: headers,
     );

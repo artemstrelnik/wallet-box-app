@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
-import 'package:wallet_box/app/screens/app_auth/html_shim.dart';
+
 import '../../core/generals_widgets/scaffold_app_bar.dart';
 import '../../core/styles/style_color_custom.dart';
 

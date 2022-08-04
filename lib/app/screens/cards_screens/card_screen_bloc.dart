@@ -1,11 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/loyalty_interactor.dart';
-import 'package:wallet_box/app/data/net/interactors/user_by_id_interactor.dart';
-import 'package:wallet_box/app/data/net/models/loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/my_loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
-import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
+
 import 'card_screen_events.dart';
 import 'card_screen_states.dart';
 

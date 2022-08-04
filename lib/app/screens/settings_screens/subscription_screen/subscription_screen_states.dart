@@ -1,5 +1,4 @@
 import 'package:wallet_box/app/data/net/models/groups_list_response.dart';
-import 'package:wallet_box/app/data/net/models/subscriptions_responce.dart';
 
 abstract class SubscriptionScreenState {
   const SubscriptionScreenState();

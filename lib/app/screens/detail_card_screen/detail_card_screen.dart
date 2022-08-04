@@ -1,6 +1,4 @@
-import 'dart:convert';
-import 'dart:math';
-
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -11,16 +9,12 @@ import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 import 'package:wallet_box/app/data/enum.dart';
-import 'package:wallet_box/app/data/net/models/loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/my_loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 
 import 'detail_card_screen_bloc.dart';
 import 'detail_card_screen_events.dart';
 import 'detail_card_screen_states.dart';
-import 'package:barcode/barcode.dart';
-import 'package:barcode_widget/barcode_widget.dart';
-import 'dart:io';
 
 class DetailCardScreen extends StatefulWidget {
   @override

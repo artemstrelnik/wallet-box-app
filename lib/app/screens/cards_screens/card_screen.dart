@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -8,11 +8,8 @@ import 'package:wallet_box/app/core/generals_widgets/button.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
 import 'package:wallet_box/app/core/generals_widgets/scaffold_app_bar.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
-import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
-import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/data/enum.dart';
-import 'package:wallet_box/app/data/net/models/loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/my_loyalty_response_model.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/screens/add_card_screens/add_card_screen.dart';
