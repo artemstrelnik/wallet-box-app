@@ -4,6 +4,7 @@ import 'dart:io';
 
 
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:wallet_box/app/data/net/models/permissions_response.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
@@ -80,6 +81,7 @@ class UserByIdInteractor {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        Logger().i(data.toString());
         final UserRegistrationModel _result =
             UserRegistrationModel.fromJson(data);
         return _result;

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/api.dart';
 import 'package:wallet_box/app/data/net/interactors/currencies_interactor.dart';
@@ -23,6 +24,8 @@ class SettingScreenBloc extends Bloc<SettingScreenEvent, SettingScreenState> {
     on<UserUpdatePinCodeEvent>(_onUserUpdatePinCode);
     on<StartPinCodeUpdateEvent>(_onStartPinCodeUpdateEvent);
     on<UserRemovePinCodeEvent>(_removePinCode);
+    on<UpdateGoogleAuthEvent>(_onUpdateGoogleAuth);
+    on<UpdateLoadingEvent>(_onUpdateLoading);
     on<RemoveUserEvent>(_removeUser);
     on<LogoutUserEvent>(_logoutUser);
   }
@@ -195,6 +198,37 @@ class SettingScreenBloc extends Bloc<SettingScreenEvent, SettingScreenState> {
       // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
       rethrow;
+    }
+  }
+
+  Future<void> _onUpdateGoogleAuth(
+    UpdateGoogleAuthEvent event,
+    Emitter<SettingScreenState> emit,
+  ) async {
+    try {
+      emit(const ListLoadingOpacityState());
+      UserRegistrationModel? _afterUpdate;
+      _afterUpdate =
+          await UserUpdateInfoInteractor().updateAuth(event.googleId);
+      emit(const ListLoadingOpacityHideState());
+      if (_afterUpdate != null && _afterUpdate.status == 200) {
+        emit(OpenSettingState(user: _afterUpdate.data));
+      }
+
+      // ignore: nullable_type_in_catch_clause
+    } on dynamic catch (_) {
+      rethrow;
+    }
+  }
+
+  void _onUpdateLoading(
+    UpdateLoadingEvent event,
+    Emitter<SettingScreenState> emit,
+  ) {
+    if (event.loading) {
+      emit(const ListLoadingOpacityState());
+    } else {
+      emit(const ListLoadingOpacityHideState());
     }
   }
 }

@@ -106,18 +106,17 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
       _canEdited.value = false;
     }
 
-    context.read<AddOperationScreenBloc>().add(
-          UpdateDateTimeEvent(date: _now),
-        );
-    context.read<AddOperationScreenBloc>().add(
-          PageOpenedEvent(userInfo: _userProvider),
-        );
+    context.read<AddOperationScreenBloc>().add(UpdateDateTimeEvent(date: _now));
+    context
+        .read<AddOperationScreenBloc>()
+        .add(PageOpenedEvent(userInfo: _userProvider));
     if (widget.isEditing && widget.transaction != null) {
       _controllerSum.text = widget.transaction!.sum.toString();
 
       _controllerDesc.text = widget.transaction?.description ?? "";
 
       _transactionType.value = widget.transaction!.action;
+      Logger().w(widget.transaction?.category.toString());
       if (widget.transaction!.category != null) {
         context.read<AddOperationScreenBloc>().add(
               UpdateSelectedCategory(category: widget.transaction!.category),
@@ -208,6 +207,7 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
             if (!widget.isEditing || widget.transaction!.category == null) {
               if (_transactionType.value == TransactionTypes.DEPOSIT ||
                   _transactionType.value == TransactionTypes.DEPOSIT) {
+                Logger().d(state.categories.toString());
                 _selectedCategory = ValueNotifier<OperationCategory>(
                     state.categories.firstWhere((e) => e.forEarn));
               } else {
@@ -271,7 +271,7 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
             message: "У вас нет активных категорий, хотите создать?",
             onPress: () async {
               Navigator.pop(context);
-              final Map<String, dynamic> returnBack = await Navigator.push(
+              final Map<String, dynamic>? returnBack = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => BlocProvider(
@@ -459,8 +459,9 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ButtonCancel(
-                        text: textString_11,
-                        onPressed: () => Navigator.pop(context)),
+                      text: textString_11,
+                      onPressed: () => Navigator.pop(context),
+                    ),
                     ButtonPink(
                       text: textString_10,
                       onPressed: () async {
@@ -506,9 +507,7 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 16,
-                )
+                SizedBox(height: 16)
               ],
             ),
           ),
@@ -1008,19 +1007,21 @@ class _AddOperationScreenPageState extends State<AddOperationScreen>
 
   Widget _transactionTypeWidget() => ValueListenableBuilder(
         valueListenable: _transactionType,
-        builder: (BuildContext context, TransactionTypes _type, _) => Container(
-          child: Column(
-            children: TransactionTypes.values
-                .map((e) => widget.transaction?.bill?.cardId != null
-                    ? e.isBank()
-                        ? _checkbox(e, _type == e)
-                        : SizedBox()
-                    : !e.isBank()
-                        ? _checkbox(e, _type == e)
-                        : SizedBox())
-                .toList(),
-          ),
-        ),
+        builder: (BuildContext context, TransactionTypes _type, _) {
+          return Container(
+            child: Column(
+              children: TransactionTypes.values
+                  .map((e) => widget.transaction?.bill?.cardId != null
+                      ? e.isBank()
+                          ? _checkbox(e, _type == e)
+                          : SizedBox()
+                      : !e.isBank()
+                          ? _checkbox(e, _type == e)
+                          : SizedBox())
+                  .toList(),
+            ),
+          );
+        },
       );
 
   Widget _checkbox(TransactionTypes e, bool isActive) => Container(

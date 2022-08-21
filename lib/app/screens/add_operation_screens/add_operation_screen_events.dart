@@ -83,3 +83,5 @@ class GetMessageIdEvent extends AddOperationScreenEvent {
 
   final Map<String, dynamic>? codeString;
 }
+
+

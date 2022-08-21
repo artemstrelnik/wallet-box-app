@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api.dart';
@@ -16,7 +17,10 @@ class UserAuthInteractor {
       final data = jsonDecode(response.body);
       prefs.setString("result", response.body);
       if (response.statusCode == 200) {
+        Logger().i("message1");
         final UserAuthModel _result = UserAuthModel.fromJson(data);
+        Logger().i("message2");
+
         await Session().setToken(token: _result.data!.token);
         return _result;
       } else {

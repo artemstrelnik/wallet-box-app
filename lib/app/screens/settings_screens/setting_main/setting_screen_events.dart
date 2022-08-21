@@ -39,7 +39,7 @@ class StartPinCodeUpdateEvent extends SettingScreenEvent {
   final String uid;
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [code, uid];
 }
 
 class RemoveUserEvent extends SettingScreenEvent {
@@ -50,4 +50,22 @@ class RemoveUserEvent extends SettingScreenEvent {
 class LogoutUserEvent extends SettingScreenEvent {
   @override
   List<Object> get props => [];
+}
+
+class UpdateGoogleAuthEvent extends SettingScreenEvent {
+  final String? googleId;
+
+  const UpdateGoogleAuthEvent({this.googleId});
+
+  @override
+  List<Object> get props => [];
+}
+
+class UpdateLoadingEvent extends SettingScreenEvent {
+  final bool loading;
+
+  const UpdateLoadingEvent({required this.loading});
+
+  @override
+  List<Object?> get props => [loading];
 }

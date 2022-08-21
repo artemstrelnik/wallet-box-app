@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
 import '../api.dart';
 
@@ -15,6 +16,7 @@ class PinCodeUpdateInteractor {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        Logger().i(data.toString());
         final UserRegistrationModel _result =
             UserRegistrationModel.fromJson(data);
         return _result;

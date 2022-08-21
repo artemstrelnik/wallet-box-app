@@ -26,6 +26,7 @@ import 'categories_open_states.dart';
 
 class CategoriesOpen extends StatefulWidget {
   const CategoriesOpen({Key? key}) : super(key: key);
+
   @override
   _CategoriesOpenState createState() => _CategoriesOpenState();
 }
@@ -45,9 +46,7 @@ class _CategoriesOpenState extends State<CategoriesOpen> with ScreenLoader {
   @override
   void initState() {
     super.initState();
-    context.read<CategoriesOpenBloc>().add(
-          PageOpenedEvent(),
-        );
+    context.read<CategoriesOpenBloc>().add(PageOpenedEvent());
   }
 
   @override
@@ -369,6 +368,7 @@ class _CategoriesOpenState extends State<CategoriesOpen> with ScreenLoader {
       case LoadingState.empty:
         return Column(
           children: [
+            _headerDate(),
             _headerWidget(),
             Expanded(
                 child: Center(
@@ -389,11 +389,56 @@ class _CategoriesOpenState extends State<CategoriesOpen> with ScreenLoader {
       default:
         return Column(
           children: [
+            _headerDate(),
             _headerWidget(),
             _transactionListWidget(),
           ],
         );
     }
+  }
+
+  ContainerCustom _headerDate() {
+    return ContainerCustom(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_category.value != null && _category.value!.forSpend)
+                  Row(
+                    children: [
+                      TextWidget(
+                        padding: 0,
+                        text: "Средний расход: ",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                      ),
+                      TextWidget(
+                        padding: 0,
+                        text: "${_category.value!.categorySpend}",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.titleCard),
+                      ),
+                    ],
+                  ),
+                if (_category.value != null && _category.value!.forEarn)
+                  Row(
+                    children: [
+                      TextWidget(
+                        padding: 0,
+                        text: "Средний доход: ",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                      ),
+                      TextWidget(
+                        padding: 0,
+                        text: "${_category.value!.categoryEarn}",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.titleCard),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          );
   }
 
   _textWidget({

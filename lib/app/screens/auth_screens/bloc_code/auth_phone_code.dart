@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_loader/screen_loader.dart';
@@ -85,6 +86,7 @@ class _AuthPhoneCodeState extends State<AuthPhoneCode> with ScreenLoader {
 
   @override
   Widget build(BuildContext context) {
+    Logger().i("message1111111");
     _userProvider = Provider.of<UserNotifierProvider>(
       context,
       listen: false,
@@ -171,12 +173,12 @@ class _AuthPhoneCodeState extends State<AuthPhoneCode> with ScreenLoader {
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           minimum: const EdgeInsets.only(left: 20, right: 20),
-          child: SingleChildScrollView(
-            child: ValueListenableBuilder(
-              valueListenable: _loadingState,
-              builder: (BuildContext context, LoadingState _state, _) =>
-                  _state == LoadingState.loaded
-                      ? Form(
+          child: ValueListenableBuilder(
+            valueListenable: _loadingState,
+            builder: (BuildContext context, LoadingState _state, _) =>
+                _state == LoadingState.loaded
+                    ? SingleChildScrollView(
+                      child: Form(
                           key: _formKey,
                           child: ValueListenableBuilder(
                             valueListenable: _screenType,
@@ -305,11 +307,11 @@ class _AuthPhoneCodeState extends State<AuthPhoneCode> with ScreenLoader {
                               ],
                             ),
                           ),
-                        )
-                      : const Center(
-                          child: CircularProgressIndicator(),
                         ),
-            ),
+                    )
+                    : const Center(
+                        child: CircularProgressIndicator(),
+                      ),
           ),
         ),
       ),

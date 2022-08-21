@@ -14,10 +14,17 @@ import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 
 class UserNotifierProvider with ChangeNotifier {
   late User? _user;
+  bool _isHiddenBills = false;
+  bool _isEarnActive = true;
   bool _isLogout = false;
 
   User? get user => _user;
+
   bool get isLogout => _isLogout;
+
+  bool get isHiddenBills => _isHiddenBills;
+
+  bool get isEarnActive => _isEarnActive;
 
   set setUser(User? _human) {
     _user = _human;
@@ -28,6 +35,16 @@ class UserNotifierProvider with ChangeNotifier {
     _isLogout = isLogout;
     notifyListeners();
   }
+
+  set setIsHiddenBills(bool isHidden) {
+    _isHiddenBills = isHidden;
+    notifyListeners();
+  }
+
+  set setIsEarnActive(bool isEarnActive) {
+    _isEarnActive = isEarnActive;
+    notifyListeners();
+  }
 }
 
 class ShowAlertProvider with ChangeNotifier {
@@ -35,6 +52,7 @@ class ShowAlertProvider with ChangeNotifier {
   String? _error;
 
   bool get isVisible => _isVisible;
+
   String? get error => _error;
 
   set setVisible(bool isVisible) {

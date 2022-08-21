@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/interactors/banks_interactor.dart';
@@ -206,12 +207,10 @@ class AddInvoiceBloc extends Bloc<AddInvoiceEvent, AddInvoiceState> {
           body: <String, String>{
             "userId": uid,
             "name": event.name,
-            "balance": event.balance.split(",").first,
-            "cents": event.balance.split(",").length == 1
-                ? "00"
-                : event.balance.split(",").last
+            "balance": "${event.balance.split(",").first}.00",
           },
         );
+        Logger().d(_createState.toString());
         if (_createState != null) {
           emit(BillCreateState(bill: _createState));
         }

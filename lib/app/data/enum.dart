@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 
@@ -143,6 +144,7 @@ enum CalendarSortTypes {
 extension CalendarSortTypesExtension on CalendarSortTypes {
   DateTime getStartDate(int index,
       {DateTime? startDay, int? difference, bool? isNext = false}) {
+    Logger().e(this.toString());
     switch (this) {
       case CalendarSortTypes.currentMonth:
         DateTime now = DateTime.now();

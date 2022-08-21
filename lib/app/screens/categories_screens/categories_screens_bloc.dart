@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/categories_by_uid_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/category_interactor.dart';
@@ -17,6 +18,7 @@ class CategoriesScreensBloc
     on<StartCreateCategory>(_onCreateCategoryRequested);
     on<CategoryEditEvent>(
         (event, emit) => emit(CategoryEditState(category: event.category)));
+    on<UpdateFavoriteCategoryEvent>(_onUpdateFavoriteCategory);
     on<RemoveCategoryEvent>(_onCategoryRemove);
     on<StartUpdateCategory>(_onCategoryUpdateRequested);
   }
@@ -28,6 +30,7 @@ class CategoriesScreensBloc
   late String _token;
 
   late User _user;
+
   // final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   void _onCategoryUpdateRequested(
@@ -52,7 +55,7 @@ class CategoriesScreensBloc
       emit(const ListLoadingOpacityHideState());
       if (_responce != null && _responce) {
         emit(const ListLoadingOpacityHideState());
-        final CatigoriesResponce? _categories =
+        final CategoriesResponse? _categories =
             await CategoriesByUidInteractor().execute(
           body: <String, String>{
             "userId": _uid,
@@ -84,7 +87,7 @@ class CategoriesScreensBloc
       );
       emit(const ListLoadingOpacityHideState());
       if (_isDelete != null && _isDelete) {
-        final CatigoriesResponce? _categories =
+        final CategoriesResponse? _categories =
             await CategoriesByUidInteractor().execute(
           body: <String, String>{
             "userId": _uid,
@@ -142,7 +145,7 @@ class CategoriesScreensBloc
       );
       emit(const ListLoadingOpacityHideState());
       if (_responce != null) {
-        final CatigoriesResponce? _categories =
+        final CategoriesResponse? _categories =
             await CategoriesByUidInteractor().execute(
           body: <String, String>{
             "userId": _uid,
@@ -162,7 +165,7 @@ class CategoriesScreensBloc
     }
   }
 
-  void _onWeatherRequested(
+  Future<void> _onWeatherRequested(
     PageOpenedEvent event,
     Emitter<CategoriseScreensState> emit,
   ) async {
@@ -194,13 +197,14 @@ class CategoriesScreensBloc
             _colors.isNotEmpty) {
           emit(FirstUpdateSelect(color: _color, icon: _icon));
         }
-        final CatigoriesResponce? _categories =
+        final CategoriesResponse? _categories =
             await CategoriesByUidInteractor().execute(
           body: <String, String>{
             "userId": _uid,
           },
           token: _token,
         );
+        Logger().i("aaaa");
         if (_categories != null && _categories.status == 200) {
           _categoriesList.addAll(_categories.data);
         }
@@ -225,6 +229,34 @@ class CategoriesScreensBloc
       // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
       rethrow;
+    }
+  }
+
+  void _onUpdateFavoriteCategory(
+    UpdateFavoriteCategoryEvent event,
+    Emitter<CategoriseScreensState> emit,
+  ) async {
+    emit(const ListLoadingOpacityState());
+    final bool? _isUpdateFavorite =
+        await CategoryInteractor().updateFavoriteCategory(
+      body: <String, String>{"categoryId": event.category.id},
+      token: _token,
+      categoryId: event.category.favorite ? event.category.id : null,
+    );
+    emit(const ListLoadingOpacityHideState());
+    if (_isUpdateFavorite != null && _isUpdateFavorite) {
+      final CategoriesResponse? _categories =
+          await CategoriesByUidInteractor().execute(
+        body: <String, String>{
+          "userId": _uid,
+        },
+        token: _token,
+      );
+      if (_categories != null && _categories.status == 200) {
+        emit(UpdateCategoriesList(categories: _categories.data));
+      } else {
+        emit(const ListErrorState());
+      }
     }
   }
 }

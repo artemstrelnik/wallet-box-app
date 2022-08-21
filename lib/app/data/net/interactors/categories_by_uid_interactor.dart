@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/categories_colors_model.dart';
 import 'package:wallet_box/app/data/net/models/categories_icons_model.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';
@@ -8,7 +9,7 @@ import 'package:wallet_box/app/data/net/models/categories_responce.dart';
 import '../api.dart';
 
 class CategoriesByUidInteractor {
-  Future<CatigoriesResponce?> base(
+  Future<CategoriesResponse?> base(
       {required Map<String, String> body, required String token}) async {
     try {
       await Session().setToken(token: token);
@@ -19,7 +20,7 @@ class CategoriesByUidInteractor {
       );
       final data = json.decode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 200) {
-        final CatigoriesResponce _result = CatigoriesResponce.fromJson(data);
+        final CategoriesResponse _result = CategoriesResponse.fromJson(data);
         return _result;
       }
       return null;
@@ -28,18 +29,19 @@ class CategoriesByUidInteractor {
     }
   }
 
-  Future<CatigoriesResponce?> execute(
+  Future<CategoriesResponse?> execute(
       {required Map<String, String> body, required String token}) async {
     try {
       await Session().setToken(token: token);
       String _t = "/api/v1/category/";
+      Logger().i(token);
       var response = await Session().generalRequestGet(
         url: _t,
         queryParameters: body,
       );
       final data = json.decode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 200) {
-        final CatigoriesResponce _result = CatigoriesResponce.fromJson(data);
+        final CategoriesResponse _result = CategoriesResponse.fromJson(data);
         return _result;
       }
       return null;

@@ -1,7 +1,7 @@
 import 'package:wallet_box/app/data/net/models/categories_colors_model.dart';
 
-class CatigoriesResponce {
-  CatigoriesResponce({
+class CategoriesResponse {
+  CategoriesResponse({
     required this.status,
     required this.data,
     required this.message,
@@ -12,7 +12,7 @@ class CatigoriesResponce {
   late final String message;
   late final List<String> advices;
 
-  CatigoriesResponce.fromJson(Map<String, dynamic> json) {
+  CategoriesResponse.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     data = List.from(json['data'])
         .map((e) => OperationCategory.fromJson(e))
@@ -42,27 +42,29 @@ class OperationCategory {
   late final CategoryColor color;
   late final OperationIcon? icon;
   late final String? description;
-  late final int categoryLimit;
+  late final double categoryLimit;
   // late final User? user;
   late final bool forEarn;
   late final bool forSpend;
   late final double? percentsFromLimit;
   late final double? categorySpend;
   late final double? categoryEarn;
+  late final bool favorite;
 
   OperationCategory.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     color = CategoryColor.fromJson(json['color']);
     icon = json['icon'] != null ? OperationIcon.fromJson(json['icon']) : null;
-    description = json['description'];
-    categoryLimit = json['categoryLimit'];
+    description = json['description']??"";
+    categoryLimit = (json['categoryLimit']) == 0 ? 0.0 : json["categoryLimit"];
     // user = User.fromJson(json['user']);
     forEarn = json['forEarn'];
     forSpend = json['forSpend'];
-    percentsFromLimit = json['percentsFromLimit'];
-    categorySpend = json['categorySpend'];
-    categoryEarn = json['categoryEarn'];
+    percentsFromLimit = json['percentsFromLimit']== 0 ? 0.0 : json["percentsFromLimit"];
+    categorySpend = json['categorySpend']== 0 ? 0.0 : json["categorySpend"] ;
+    categoryEarn = json['categoryEarn']== 0 ? 0.0 : json["categoryEarn"];
+    favorite = json['favorite'];
   }
 }
 

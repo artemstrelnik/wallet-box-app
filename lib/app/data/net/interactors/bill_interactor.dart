@@ -12,6 +12,7 @@ class BillInteractor {
     try {
       await Session().setToken(token: token);
       String _t = "/api/v1/bill/" + body["billId"]!;
+      Logger().d(_t.toString());
       var response = await Session().generalRequestDelete(
         url: _t,
       );
@@ -34,6 +35,7 @@ class BillInteractor {
         url: _t,
         queryParameters: {},
       );
+      Logger().i(response.body.toString());
       final data = json.decode(utf8.decode(response.bodyBytes));
       if (response.statusCode == 200) {
         final BillResponse _result = BillResponse.fromJson(data);
@@ -53,19 +55,15 @@ class BillInteractor {
   }) async {
     try {
       await Session().setToken(token: token);
-      Logger().e('message333333333');
       String _t = "/api/v1/bill/" + type.name.toLowerCase() + "/" + billId;
-      Logger().w(_t.toString());
-      Logger().w(body.toString());
       var response = await Session().generalPatchRequest(
         url: _t,
         body: body,
       );
-      Logger().w(response.body.toString());
-      final data = json.decode(utf8.decode(response.bodyBytes));
+      // final data = json.decode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200) {
-        final SingleBillResponse _result = SingleBillResponse.fromJson(data);
+        // final ObjectBillResponse _result = ObjectBillResponse.fromJson(data);
         return true;
       }
       return null;
@@ -145,4 +143,28 @@ class BillInteractor {
       return null;
     }
   }
+
+  Future<bool?> updateBillHidden({
+    required Map<String, dynamic> body,
+    required String token,
+    required String id,
+  }) async {
+    try {
+      await Session().setToken(token: token);
+      String _t = "/api/v1/bill/$id";
+      var response = await Session().generalPatchRequest(
+        url: _t,
+        body: body,
+      );
+      Logger().i(response.body.toString());
+      // final data = json.decode(utf8.decode(response.bodyBytes));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      return null;
+    } catch (ex) {
+      return null;
+    }
+  }
+
 }

@@ -56,3 +56,9 @@ class StartUpdateCategory extends CategoriseScreensEvent {
   final OperationCategory category;
   final bool onlyForEarn;
 }
+
+class UpdateFavoriteCategoryEvent extends CategoriseScreensEvent {
+  final OperationCategory category;
+
+  UpdateFavoriteCategoryEvent({required this.category});
+}

@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:core';
-import '../api.dart';
+
+import 'package:http/http.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';
+
+import '../api.dart';
 
 class CategoryInteractor {
   Future<OperationCategory?> execute(
@@ -53,6 +56,33 @@ class CategoryInteractor {
         url: _t,
       );
       final data = jsonDecode(response.body);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (ex) {
+      return null;
+    }
+  }
+
+  Future<bool?> updateFavoriteCategory({
+    required Map<String, dynamic> body,
+    required String token,
+    String? categoryId,
+  }) async {
+    try {
+      await Session().setToken(token: token);
+      late Response response;
+      if (categoryId == null) {
+        String _t = "/api/v1/category/favorite";
+        response = await Session().generalPatchRequest(
+          url: _t,
+          body: body,
+        );
+      } else {
+        String _t = "/api/v1/category/favorite/$categoryId";
+        response = await Session().generalRequestDelete(url: _t);
+      }
       if (response.statusCode == 201 || response.statusCode == 200) {
         return true;
       }

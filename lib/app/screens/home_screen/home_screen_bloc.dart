@@ -1,10 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/interactors/banks_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/bill_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/transaction_interactor.dart';
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
+import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 
@@ -22,15 +25,20 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     on<BankBillUpdateEvent>(_updateBankBill);
     on<UpdateRangeDatesEvent>(_updateRangeDates);
     on<RemoveTransaction>(_removeTransactionByIdRequest);
+    on<UpdateSchemeTypeEvent>(_updateSchemeType);
+    on<UpdateSpendEarnEvent>(_updateSpendEarn);
+    on<UpdateBillHiddenEvent>(_onUpdateBillHidden);
   }
 
   late User _user;
+
   // final FlutterSecureStorage storage = new FlutterSecureStorage();
   CalendarSortTypes _sortType = CalendarSortTypes.currentMonth;
 
   late DateTime _start;
   late DateTime _end;
   int index = 0;
+
   // Bill? _selectedBill;
 
   void _removeTransactionByIdRequest(
@@ -160,8 +168,10 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     Emitter<HomeScreenState> emit,
   ) async {
     try {
+      emit(ListLoadingState());
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _sortType = event.sort;
+      Logger().e(_sortType.toString());
       switch (event.sort) {
         case CalendarSortTypes.currentMonth:
         case CalendarSortTypes.currentWeek:
@@ -203,7 +213,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           }
           break;
       }
-
       if (event.billId != null) {
         emit(UpdateSelectedBill(bill: event.billId!));
         // _selectedBill = event.bill;
@@ -211,7 +220,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         emit(UpdateSelectedBill(bill: ""));
         // _selectedBill = null;
       }
-
       String? token = await prefs.getString("wallet_box_token");
       String? uid = await prefs.getString("wallet_box_uid");
       if (token != null && uid != null) {
@@ -263,7 +271,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
         emit(UpdateBillList(bills: _listBills));
 
-        // all bill transactions
         final TransactionsResponcePageInfo? _allBillTransactions =
             await _abstractAllTransactionsRequest(
           emit,
@@ -271,22 +278,25 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           uid,
           _start,
           _end,
+          null,
         );
-        if (_allBillTransactions != null) {
-          _listTransactions.addAll(_allBillTransactions.page);
+
+        final TransactionsResponcePageInfo? _requestBillTransactions =
+            await _abstractAllTransactionsRequest(
+          emit,
+          token,
+          uid,
+          _start,
+          _end,
+          event.isExpense,
+        );
+
+        List<Transaction> _allListTransactions = <Transaction>[];
+
+        if (_requestBillTransactions != null && _allBillTransactions != null) {
+          _listTransactions.addAll(_requestBillTransactions.page);
+          _allListTransactions.addAll(_allBillTransactions.page);
         }
-        // bill transactions
-        // final TransactionsResponcePageInfo? _billTransactions =
-        //     await _billTransactionsRequest(
-        //   emit,
-        //   token,
-        //   uid,
-        //   _start,
-        //   _end,
-        // );
-        // if (_billTransactions != null) {
-        //   _listTransactions.addAll(_billTransactions.page);
-        // }
 
         emit(UpdateSchemeState(
           start: _start,
@@ -295,8 +305,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           sort: _sortType,
           index: index,
         ));
-        emit(UpdateTransactionList(transaction: _listTransactions));
-
+        emit(UpdateTransactionList(transaction: _allListTransactions));
         if ((event.prev != null && event.prev!) ||
             (event.next != null && event.next!) ||
             event.billId != null ||
@@ -371,9 +380,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         _start = _sortType.getStartDate(index);
         _end = _sortType.getEndDate(index);
 
-        // final List<Course>? _coursesList =
-        //     await CurrenciesInteractor().course();
-
         List<Bill> _listBills = <Bill>[];
 
         List<Transaction> _listTransactions = <Transaction>[];
@@ -404,20 +410,10 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           _listBills.addAll(_responseListBills);
         }
 
-        // Future.forEach(_listBills, (Bill e) {
-        //   if (_user.walletType != "RUB" &&
-        //       _coursesList != null &&
-        //       _coursesList.isNotEmpty) {
-        //     final Course _course =
-        //         _coursesList.where((e) => e.wallet == "RUB").first;
-        //     e.balance!.amount =
-        //         int.parse((e.balance!.amount / _course.value!).toString());
-        //   }
-        // });
-
         emit(UpdateBillList(bills: _listBills));
 
-        // all bill transactions
+        List<Transaction> _allListTransactions = <Transaction>[];
+
         final TransactionsResponcePageInfo? _allBillTransactions =
             await _abstractAllTransactionsRequest(
           emit,
@@ -425,20 +421,22 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           uid,
           _start,
           _end,
+          null,
         );
-        if (_allBillTransactions != null) {
-          _listTransactions.addAll(_allBillTransactions.page);
-        }
 
-        // Future.forEach(_listTransactions, (Transaction e) {
-        //   if (_user.walletType != "RUB" &&
-        //       _coursesList != null &&
-        //       _coursesList.isNotEmpty) {
-        //     final Course _course =
-        //         _coursesList.where((e) => e.wallet == "RUB").first;
-        //     e.sum = e.sum! / _course.value!;
-        //   }
-        // });
+        final TransactionsResponcePageInfo? _requestBillTransactions =
+            await _abstractAllTransactionsRequest(
+          emit,
+          token,
+          uid,
+          _start,
+          _end,
+          event.isExpense,
+        );
+        if (_requestBillTransactions != null && _allBillTransactions != null) {
+          _listTransactions.addAll(_requestBillTransactions.page);
+          _allListTransactions.addAll(_allBillTransactions.page);
+        }
 
         emit(UpdateSchemeState(
           start: _start,
@@ -447,8 +445,10 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           sort: _sortType,
           index: index,
         ));
-        emit(UpdateTransactionList(transaction: _listTransactions));
+        // Logger().i(_listTransactions[0].);
+        emit(UpdateTransactionList(transaction: _allListTransactions));
       }
+
       emit(const ListLoadingOpacityHideState());
       // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
@@ -462,14 +462,16 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     String uid,
     DateTime start,
     DateTime end,
+    bool? isExpense,
   ) async {
     Map<String, String> body = <String, String>{
-      "startDate": start.toIso8601String() + "+00:00",
-      "endDate": end.toIso8601String() + "+00:00",
+      "startDate": start.toIso8601String() + "Z",
+      "endDate": end.toIso8601String() + "Z",
     };
     return await TransactionInteractor().abstractAllTransactions(
       token: token,
       body: body,
+      isExpense: isExpense,
     );
   }
 
@@ -489,5 +491,118 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       token: token,
       body: body,
     );
+  }
+
+  Future<void> _updateSchemeType(
+    UpdateSchemeTypeEvent event,
+    Emitter<HomeScreenState> emit,
+  ) async {
+    try {
+      emit(const ListLoadingOpacityState());
+      emit(UpdateCircleSchemeState(event.isExpense));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("wallet_box_token");
+      String? uid = prefs.getString("wallet_box_uid");
+      if (token != null && uid != null) {
+        List<Transaction> _listTransactions = <Transaction>[];
+        // List<Transaction> _allListTransactions = <Transaction>[];
+
+        // final TransactionsResponcePageInfo? _allBillTransactions =
+        // await _abstractAllTransactionsRequest(
+        //   emit,
+        //   token,
+        //   uid,
+        //   _start,
+        //   _end,
+        //   null,
+        // );
+
+        final TransactionsResponcePageInfo? _requestBillTransactions =
+            await _abstractAllTransactionsRequest(
+          emit,
+          token,
+          uid,
+          _start,
+          _end,
+          event.isExpense,
+        );
+        if ( _requestBillTransactions != null) {
+          _listTransactions.addAll(_requestBillTransactions.page);
+          // _allListTransactions.addAll(_allBillTransactions.page);
+        }
+
+        emit(UpdateSchemeState(
+          start: _start,
+          end: _end,
+          transaction: _listTransactions,
+          sort: _sortType,
+          index: index,
+        ));
+        // emit(UpdateTransactionList(transaction: _allListTransactions));
+      }
+
+      emit(const ListLoadingOpacityHideState());
+    } on dynamic catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<void> _updateSpendEarn(
+    UpdateSpendEarnEvent event,
+    Emitter<HomeScreenState> emit,
+  ) async {
+    try {
+      emit(const ListLoadingOpacityState());
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("wallet_box_token");
+      String? uid = prefs.getString("wallet_box_uid");
+      if (token != null && uid != null) {
+        Map<String, dynamic> body = <String, dynamic>{
+          if (event.plannedSpend != null) "plannedSpend": event.plannedSpend,
+          if (event.plannedEarn != null) "plannedEarn": event.plannedEarn,
+        };
+        final User? response = await TransactionInteractor().updateEarnSpend(
+          body: body,
+          token: token,
+        );
+        if (response != null) {
+          emit(UpdateUserState(user: response));
+        }
+      }
+      emit(const ListLoadingOpacityHideState());
+    } on dynamic catch (_) {
+      rethrow;
+    }
+  }
+
+  Future<void> _onUpdateBillHidden(
+    UpdateBillHiddenEvent event,
+    Emitter<HomeScreenState> emit,
+  ) async {
+    try {
+      emit(const ListLoadingOpacityState());
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("wallet_box_token");
+      String? uid = prefs.getString("wallet_box_uid");
+      if (token != null && uid != null) {
+        Map<String, dynamic> body = <String, dynamic>{"hidden": event.isHidden};
+        final bool? response = await BillInteractor().updateBillHidden(
+          body: body,
+          token: token,
+          id: event.id,
+        );
+        if (response != null) {
+          final List<Bill>? _responseListBills = await BillInteractor()
+              .fullList(token: token, body: <String, String>{});
+
+          if (_responseListBills != null && _responseListBills.isNotEmpty) {
+            emit(UpdateBillList(bills: _responseListBills));
+          }
+        }
+      }
+      emit(const ListLoadingOpacityHideState());
+    } on dynamic catch (_) {
+      rethrow;
+    }
   }
 }

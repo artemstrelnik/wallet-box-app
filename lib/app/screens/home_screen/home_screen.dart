@@ -1,17 +1,23 @@
-import 'dart:collection';
 import 'dart:async';
+import 'dart:collection';
 
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:screen_loader/screen_loader.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/constants/string_extension.dart';
@@ -41,26 +47,25 @@ import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_scr
 import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_screen_page.dart';
 import 'package:wallet_box/app/screens/tochka_webview/tochka_webview.dart';
 
+import '../../core/generals_widgets/customBottomSheet.dart';
 import '../../data/net/models/permission_role_provider.dart';
+import '../../data/net/models/user_auth_model.dart';
 import 'home_screen_bloc.dart';
 import 'home_screen_events.dart';
 import 'home_screen_states.dart';
-import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
-
 import 'widgets/icon_loader.dart';
-import 'package:screen_loader/screen_loader.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, this.type}) : super(key: key);
   final OperationType? type;
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
+  int touchedIndex = -1;
+
   final ValueNotifier<List<Transaction>?> _transactionList =
       ValueNotifier<List<Transaction>?>(null);
   final ValueNotifier<List<Bill>?> _billsList =
@@ -84,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
   Timer? _debounce;
   DateRangePickerController controller = DateRangePickerController();
   late UserNotifierProvider _userProvider;
+  late Brightness _brightness;
 
   DateTime? _start;
   DateTime? _end;
@@ -102,24 +108,14 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
       context,
       listen: false,
     );
-    context.read<HomeScreenBloc>().add(
-          PageOpenedEvent(user: _userProvider),
-        );
+    context.read<HomeScreenBloc>().add(PageOpenedEvent(
+        user: _userProvider, isExpense: _userProvider.isEarnActive));
     if (widget.type != null) {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         _openOperation(context);
       });
     }
     initializeDateFormatting("ru");
-    checkUser();
-  }
-
-  checkUser()async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    final String? uid = prefs.getString("wallet_box_uid");
-    final String? token = prefs.getString("wallet_box_token");
-    Logger().i("uid => $uid  token => $token");
   }
 
   @override
@@ -140,9 +136,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
       ),
     );
     if (returnBack != null && returnBack) {
-      context.read<HomeScreenBloc>().add(
-            PageOpenedEvent(),
-          );
+      context
+          .read<HomeScreenBloc>()
+          .add(PageOpenedEvent(isExpense: _userProvider.isEarnActive));
     }
   }
 
@@ -173,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
 
   @override
   Widget build(BuildContext context) {
+    _brightness = ThemeModelInheritedNotifier.of(context).theme.brightness;
     return BlocListener<HomeScreenBloc, HomeScreenState>(
       listener: (context, state) {
         if (state is UpdateSelectedBill) {
@@ -180,6 +177,10 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         }
         if (state is UpdateTransactionList) {
           _transactionList.value = state.transaction;
+        }
+        if (state is UpdateUserState) {
+          Logger().i("message");
+          _userProvider.setUser = state.user;
         }
         if (state is UpdateBillList) {
           if (state.bills.isNotEmpty) {
@@ -213,9 +214,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           Navigator.pop(context);
         }
         if (state is NeedUpdateBillsListState) {
-          context.read<HomeScreenBloc>().add(
-                PageOpenedEvent(),
-              );
+          context
+              .read<HomeScreenBloc>()
+              .add(PageOpenedEvent(isExpense: _userProvider.isEarnActive));
         }
         if (state is ListLoadingOpacityState) startLoading();
         if (state is ListLoadingOpacityHideState) stopLoading();
@@ -255,196 +256,263 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           margin: false,
           appBar: false,
           //onTap: share,
-          body: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 10,
-                    ),
-                    child: Column(
-                      children: [
-                        _billsListWidget(),
-                        _schemeWidget(context),
-                      ],
-                    ),
-                  ),
-                  _transactionListWidget(),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Stack(
-                  alignment: Alignment.center,
+          body: GestureDetector(
+            onTap: () {
+              if (touchedIndex != -1) {
+                setState(() {
+                  touchedIndex = -1;
+                });
+              }
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                ListView(
                   children: [
-                    ContainerCustom(
-                      turnColor: false,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Column(
                         children: [
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BlocProvider(
-                                  create: (context) => BudgetScreenBloc(),
-                                  child: BudgetScreen(),
-                                ),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: ShaderMask(
-                                shaderCallback: (bounds) {
-                                  return const LinearGradient(
-                                    colors: CustomColors.listGradienAction,
-                                  ).createShader(bounds);
-                                },
-                                child: SvgPicture.asset(
-                                  menuOne,
-                                  width: 25,
-                                ),
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BlocProvider(
-                                    create: (context) =>
-                                        CategoriesScreensBloc(),
-                                    child: const CategoriseScreensPage(),
-                                  ),
-                                ),
-                              );
-                              context.read<HomeScreenBloc>().add(
-                                    PageOpenedEvent(),
-                                  );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: ShaderMask(
-                                shaderCallback: (bounds) {
-                                  return const LinearGradient(
-                                    colors: CustomColors.listGradienAction,
-                                  ).createShader(bounds);
-                                },
-                                child: SvgPicture.asset(
-                                  menuTwo,
-                                  width: 25,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.all(2),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BlocProvider(
-                                  create: (context) => CardScreenBloc(),
-                                  child: CardScreen(),
-                                ),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: ShaderMask(
-                                shaderCallback: (bounds) {
-                                  return const LinearGradient(
-                                    colors: CustomColors.listGradienAction,
-                                  ).createShader(bounds);
-                                },
-                                child: SvgPicture.asset(
-                                  menuThree,
-                                  width: 25,
-                                ),
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              final bool? returnBack = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BlocProvider(
-                                    create: (context) => SettingScreenBloc(),
-                                    child: const SettingScreen(),
-                                  ),
-                                ),
-                              );
-                              context.read<HomeScreenBloc>().add(
-                                    PageOpenedEvent(),
-                                  );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(2),
-                              child: ShaderMask(
-                                shaderCallback: (bounds) {
-                                  return const LinearGradient(
-                                    colors: CustomColors.listGradienAction,
-                                  ).createShader(bounds);
-                                },
-                                child: SvgPicture.asset(
-                                  menuFour,
-                                  width: 25,
-                                ),
-                              ),
-                            ),
-                          ),
+                          _billsListWidget(),
+                          _billAndCircleMiddleBody(),
+                          _schemeWidget(context),
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () async {
-                        final bool? returnBack = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            settings:
-                                RouteSettings(name: '/add_operation_screen'),
-                            builder: (_) => BlocProvider(
-                              create: (context) => AddOperationScreenBloc(),
-                              child: const AddOperationScreen(),
-                            ),
-                          ),
-                        );
-                        if (returnBack != null && returnBack) {
-                          context.read<HomeScreenBloc>().add(
-                                PageOpenedEvent(),
-                              );
-                        }
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 40),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: const LinearGradient(
-                              colors: CustomColors.listGradienAction),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Icon(
-                            Icons.add,
-                            size: 40,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    )
+                    _transactionListWidget(),
                   ],
                 ),
-              )
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ContainerCustom(
+                        turnColor: false,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (context) => BudgetScreenBloc(),
+                                    child: BudgetScreen(),
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) {
+                                    return const LinearGradient(
+                                      colors: CustomColors.listGradienAction,
+                                    ).createShader(bounds);
+                                  },
+                                  child: SvgPicture.asset(
+                                    menuOne,
+                                    width: 25,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BlocProvider(
+                                      create: (context) =>
+                                          CategoriesScreensBloc(),
+                                      child: const CategoriseScreensPage(),
+                                    ),
+                                  ),
+                                );
+                                context.read<HomeScreenBloc>().add(
+                                      PageOpenedEvent(
+                                          isExpense:
+                                              _userProvider.isEarnActive),
+                                    );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) {
+                                    return const LinearGradient(
+                                      colors: CustomColors.listGradienAction,
+                                    ).createShader(bounds);
+                                  },
+                                  child: SvgPicture.asset(
+                                    menuTwo,
+                                    width: 25,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.all(2),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (context) => CardScreenBloc(),
+                                    child: CardScreen(),
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) {
+                                    return const LinearGradient(
+                                      colors: CustomColors.listGradienAction,
+                                    ).createShader(bounds);
+                                  },
+                                  child: SvgPicture.asset(
+                                    menuThree,
+                                    width: 25,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                // final bool? returnBack =
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BlocProvider(
+                                      create: (context) => SettingScreenBloc(),
+                                      child: const SettingScreen(),
+                                    ),
+                                  ),
+                                );
+                                context.read<HomeScreenBloc>().add(
+                                      PageOpenedEvent(
+                                          isExpense:
+                                              _userProvider.isEarnActive),
+                                    );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) {
+                                    return const LinearGradient(
+                                      colors: CustomColors.listGradienAction,
+                                    ).createShader(bounds);
+                                  },
+                                  child: SvgPicture.asset(
+                                    menuFour,
+                                    width: 25,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          final bool? returnBack = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              settings:
+                                  RouteSettings(name: '/add_operation_screen'),
+                              builder: (_) => BlocProvider(
+                                create: (context) => AddOperationScreenBloc(),
+                                child: const AddOperationScreen(),
+                              ),
+                            ),
+                          );
+                          if (returnBack != null && returnBack) {
+                            context.read<HomeScreenBloc>().add(PageOpenedEvent(
+                                isExpense: _userProvider.isEarnActive));
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 40),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            gradient: const LinearGradient(
+                                colors: CustomColors.listGradienAction),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Icon(
+                              Icons.add,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       );
+
+  Padding _billAndCircleMiddleBody() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ContainerCustom(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Selector<UserNotifierProvider, User?>(
+              selector: (_, provider) => provider.user,
+              builder: (context, user, _) => Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "Запланированный расход: ",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                      ),
+                      Text(
+                        "${user?.plannedSpend ?? 0}",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.titleCard),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text(
+                        "Запланированный доход: ",
+                        style: StyleTextCustom()
+                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                      ),
+                      Text("${user?.plannedEarn ?? 0}",
+                          style: StyleTextCustom().setStyleByEnum(
+                              context, StyleTextEnum.titleCard)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              CustomBottomSheet.customBottomSheet(context, _bottomSheet());
+            },
+            icon: Icon(CupertinoIcons.pen),
+          ),
+        ],
+      )),
+    );
+  }
 
   Widget _transactionListWidget() => ValueListenableBuilder(
         valueListenable: _transactionList,
@@ -590,7 +658,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       child: const Text('Изменить'),
                       onPressed: () async {
                         Navigator.pop(context);
-                        final bool? returnBack = await Navigator.push(
+                        // final bool? returnBack =
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             settings:
@@ -607,7 +676,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                         );
                         // if (returnBack != null && returnBack) {
                         _context.read<HomeScreenBloc>().add(
-                              PageOpenedEvent(),
+                              PageOpenedEvent(
+                                  isExpense: _userProvider.isEarnActive),
                             );
                         // }
                       },
@@ -626,7 +696,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       child: const Text('Изменить'),
                       onPressed: () async {
                         Navigator.pop(context);
-                        final bool? returnBack = await Navigator.push(
+                        // final bool? returnBack =
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             settings:
@@ -643,7 +714,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                         );
                         // if (returnBack != null && returnBack) {
                         _context.read<HomeScreenBloc>().add(
-                              PageOpenedEvent(),
+                              PageOpenedEvent(
+                                  isExpense: _userProvider.isEarnActive),
                             );
                         // }
                       },
@@ -781,14 +853,15 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
       behavior: HitTestBehavior.translucent,
       onTap: () => context.read<HomeScreenBloc>().add(
             UpdateSortEvent(
-              sort: _sortTypeState.value,
-              billChange: true,
-            ),
+                sort: _sortTypeState.value,
+                billChange: true,
+                isExpense: _userProvider.isEarnActive),
           ),
       child: Container(
+        width: 200,
         margin: const EdgeInsets.only(right: 12),
         child: ContainerCustom(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(5),
           gradient: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -803,15 +876,50 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       color: Colors.white,
                     ),
                   ),
-                  TextWidget(
-                    padding: 0,
-                    text: textString_60,
-                    style: StyleTextCustom()
-                        .setStyleByEnum(context, StyleTextEnum.white),
+                  Expanded(
+                    child: TextWidget(
+                      padding: 0,
+                      text: textString_60,
+                      style: StyleTextCustom()
+                          .setStyleByEnum(context, StyleTextEnum.white),
+                    ),
                   ),
-                  Container(
-                    width: 80,
-                  )
+                  PopupMenuButton<String>(
+                      color: StyleColorCustom().setStyleByEnum(
+                        context,
+                        StyleColorEnum.secondaryBackground,
+                      ),
+                      child: Icon(Icons.more_horiz),
+                      itemBuilder: (context) {
+                        return [
+                          PopupMenuItem(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _userProvider.isHiddenBills
+                                      ? CupertinoIcons.eye_slash
+                                      : CupertinoIcons.eye,
+                                ),
+                                SizedBox(width: 10),
+                                Text(
+                                  _userProvider.isHiddenBills
+                                      ? "Скрыть скрытые"
+                                      : "Показать скрытые",
+                                  style: StyleTextCustom().setStyleByEnum(
+                                    context,
+                                    StyleTextEnum.bodyCard,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              _userProvider.isHiddenBills
+                                  ? _userProvider.setIsHiddenBills = false
+                                  : _userProvider.setIsHiddenBills = true;
+                            },
+                          ),
+                        ];
+                      }),
                 ],
               ),
               TextWidget(
@@ -843,7 +951,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
 
   Widget _addNewBill() => GestureDetector(
         onTap: () async {
-          final bool? returnBack = await Navigator.push(
+          // final bool? returnBack =
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => BlocProvider(
@@ -854,7 +963,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           );
           // if (returnBack != null && returnBack) {
           context.read<HomeScreenBloc>().add(
-                PageOpenedEvent(),
+                PageOpenedEvent(isExpense: _userProvider.isEarnActive),
               );
           // }
         },
@@ -908,12 +1017,11 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
               late Widget _child;
 
               final double _price = _items
-                      ?.map((bill) => double.parse(
-                          (bill.balance?.amount ?? 0).toString() +
-                              "." +
-                              ((bill.balance?.cents ?? 0) != null
-                                  ? (bill.balance?.cents ?? 0).toString()
-                                  : "00")))
+                      ?.map((bill) => double.parse((bill.balance).toString()))
+                      // "." +
+                      // ((bill.balance?.cents ?? 0) != null
+                      //     ? (bill.balance?.cents ?? 0).toString()
+                      //     : "00")))
                       .toList()
                       .reduce((a, b) => a + b) ??
                   0.0;
@@ -963,188 +1071,247 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
     required Bill bill,
     bool isActive = false,
   }) =>
-      GestureDetector(
-        onTap: () {
-          _context.read<HomeScreenBloc>().add(
-                UpdateSortEvent(
-                  sort: _sortTypeState.value,
-                  //bill: bill,
-                  billId: bill.id,
+      Selector<UserNotifierProvider, bool>(
+          builder: (context, isHiddenState, _) => bill.hidden &&
+                  (!isHiddenState)
+              ? SizedBox.shrink()
+              : GestureDetector(
+                  onTap: () {
+                    _context.read<HomeScreenBloc>().add(
+                          UpdateSortEvent(
+                              sort: _sortTypeState.value,
+                              //bill: bill,
+                              billId: bill.id,
+                              isExpense: _userProvider.isEarnActive),
+                        );
+                  },
+                  onLongPress: () {
+                    showCupertinoModalPopup<void>(
+                      context: context,
+                      builder: (BuildContext context) => CupertinoActionSheet(
+                        actions: bill.bankName == null
+                            ? [
+                                CupertinoActionSheetAction(
+                                  child: const Text('Изменить'),
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    // final bool? returnBack =
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider(
+                                            create: (context) =>
+                                                AddInvoiceBloc(),
+                                            child: AddInvoice(
+                                                isEditing: true,
+                                                id: bill.id,
+                                                name: bill.name,
+                                                balance:
+                                                    bill.balance.toString())
+                                            // "." +
+                                            // (bill.balance?.cents ?? 0).toString()),
+                                            ),
+                                      ),
+                                    );
+                                    // if (returnBack != null && returnBack) {
+                                    _context.read<HomeScreenBloc>().add(
+                                        PageOpenedEvent(
+                                            isExpense:
+                                                _userProvider.isEarnActive));
+                                    // }
+                                  },
+                                ),
+                                CupertinoActionSheetAction(
+                                  child: const Text('Удалить'),
+                                  onPressed: () {
+                                    _context
+                                        .read<HomeScreenBloc>()
+                                        .add(BillRemoveEvent(billId: bill.id));
+                                  },
+                                )
+                              ]
+                            : [
+                                CupertinoActionSheetAction(
+                                  child: const Text('Обновить'),
+                                  onPressed: () {
+                                    _context.read<HomeScreenBloc>().add(
+                                        BankBillUpdateEvent(
+                                            bank: bill.bankName));
+                                  },
+                                ),
+                                CupertinoActionSheetAction(
+                                  child: const Text('Удалить'),
+                                  onPressed: () {
+                                    _context.read<HomeScreenBloc>().add(
+                                        BankBillRemoveEvent(
+                                            bank: bill.bankName));
+                                  },
+                                ),
+                              ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        top: 5, bottom: 10, right: 10, left: 10),
+                    margin:
+                        const EdgeInsets.only(top: 10, bottom: 5, right: 12),
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: StyleColorCustom().setStyleByEnum(
+                        context,
+                        StyleColorEnum.secondaryBackground,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: isActive
+                            ? Colors.red
+                            : StyleColorCustom().setStyleByEnum(
+                                context,
+                                StyleColorEnum.secondaryBackground,
+                              ),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: bill.bankName != null
+                                  ? SizedBox(
+                                      child: bill.bankName!.icon(),
+                                      width: 20,
+                                      height: 20,
+                                    )
+                                  : Icon(
+                                      Icons.account_balance_wallet_outlined,
+                                      color: StyleColorCustom().setStyleByEnum(
+                                        context,
+                                        StyleColorEnum.primaryBackgroundReverse,
+                                      ),
+                                    ),
+                            ),
+                            Expanded(
+                              child: TextWidget(
+                                padding: 0,
+                                text: bill.bankName != null
+                                    ? bill.bankName!.title()
+                                    : bill.name,
+                                style: StyleTextCustom()
+                                    .setStyleByEnum(
+                                        context, StyleTextEnum.bodyCard)
+                                    .copyWith(
+                                      fontSize: 12,
+                                      height: 15 / 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                                color: StyleColorCustom().setStyleByEnum(
+                                  context,
+                                  StyleColorEnum.secondaryBackground,
+                                ),
+                                child: Icon(Icons.more_horiz),
+                                itemBuilder: (context) {
+                                  return [
+                                    PopupMenuItem(
+                                      child: Row(
+                                        children: [
+                                          Icon(!bill.hidden
+                                              ? CupertinoIcons.eye_slash
+                                              : CupertinoIcons.eye),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            !bill.hidden
+                                                ? "Скрыть"
+                                                : "Показать",
+                                            style: StyleTextCustom()
+                                                .setStyleByEnum(
+                                              context,
+                                              StyleTextEnum.bodyCard,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        bill.hidden
+                                            ? context
+                                                .read<HomeScreenBloc>()
+                                                .add(UpdateBillHiddenEvent(
+                                                  id: bill.id,
+                                                  isHidden: false,
+                                                ))
+                                            : context
+                                                .read<HomeScreenBloc>()
+                                                .add(UpdateBillHiddenEvent(
+                                                  id: bill.id,
+                                                  isHidden: true,
+                                                ));
+                                      },
+                                    ),
+                                  ];
+                                }),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            bill.bankName != null
+                                ? TextWidget(
+                                    padding: 0,
+                                    text: "**** " +
+                                        bill.cardNumber!.substring(
+                                            bill.cardNumber!.length - 4),
+                                    style: StyleTextCustom()
+                                        .setStyleByEnum(
+                                            context, StyleTextEnum.bodyCard)
+                                        .copyWith(
+                                          fontSize: 12,
+                                          height: 15 / 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                : const SizedBox(),
+                            Expanded(
+                              child: TextWidget(
+                                align: TextAlign.end,
+                                padding: 0,
+                                text: maskFormatter
+                                        .maskText((bill.balance)
+                                            .toString()
+                                            .split("")
+                                            .reversed
+                                            .join(""))
+                                        .split("")
+                                        .reversed
+                                        .join("") +
+                                    "," +
+                                    // ((bill.balance?.cents ?? 0) != null
+                                    //     ? " " + (bill.balance?.cents ?? 0).toString()
+                                    //     : " 00") +
+                                    " ₽",
+                                style: StyleTextCustom()
+                                    .setStyleByEnum(
+                                        context, StyleTextEnum.bodyCard)
+                                    .copyWith(
+                                      fontSize: 14,
+                                      height: 17 / 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              );
-        },
-        onLongPress: () {
-          showCupertinoModalPopup<void>(
-            context: context,
-            builder: (BuildContext context) => CupertinoActionSheet(
-              actions: bill.bankName == null
-                  ? [
-                      CupertinoActionSheetAction(
-                        child: const Text('Изменить'),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          final bool? returnBack = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider(
-                                create: (context) => AddInvoiceBloc(),
-                                child: AddInvoice(
-                                    isEditing: true,
-                                    id: bill.id,
-                                    name: bill.name,
-                                    balance: bill.balance!.amount.toString() +
-                                        "." +
-                                        (bill.balance?.cents ?? 0).toString()),
-                              ),
-                            ),
-                          );
-                          // if (returnBack != null && returnBack) {
-                          _context.read<HomeScreenBloc>().add(
-                                PageOpenedEvent(),
-                              );
-                          // }
-                        },
-                      ),
-                      CupertinoActionSheetAction(
-                        child: const Text('Удалить'),
-                        onPressed: () {
-                          _context
-                              .read<HomeScreenBloc>()
-                              .add(BillRemoveEvent(billId: bill.id));
-                        },
-                      )
-                    ]
-                  : [
-                      CupertinoActionSheetAction(
-                        child: const Text('Обновить'),
-                        onPressed: () {
-                          _context
-                              .read<HomeScreenBloc>()
-                              .add(BankBillUpdateEvent(bank: bill.bankName));
-                        },
-                      ),
-                      CupertinoActionSheetAction(
-                        child: const Text('Удалить'),
-                        onPressed: () {
-                          _context
-                              .read<HomeScreenBloc>()
-                              .add(BankBillRemoveEvent(bank: bill.bankName));
-                        },
-                      ),
-                    ],
-            ),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.only(top: 10, bottom: 5, right: 12),
-          width: 200,
-          decoration: BoxDecoration(
-            color: StyleColorCustom().setStyleByEnum(
-              context,
-              StyleColorEnum.secondaryBackground,
-            ),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: isActive
-                  ? Colors.red
-                  : StyleColorCustom().setStyleByEnum(
-                      context,
-                      StyleColorEnum.secondaryBackground,
-                    ),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0, top: 2.0),
-                    child: bill.bankName != null
-                        ? SizedBox(
-                            child: bill.bankName!.icon(),
-                            width: 20,
-                            height: 20,
-                          )
-                        : Icon(
-                            Icons.account_balance_wallet_outlined,
-                            color: StyleColorCustom().setStyleByEnum(
-                              context,
-                              StyleColorEnum.primaryBackgroundReverse,
-                            ),
-                          ),
-                  ),
-                  Expanded(
-                    child: TextWidget(
-                      padding: 0,
-                      text: bill.bankName != null
-                          ? bill.bankName!.title()
-                          : bill.name,
-                      style: StyleTextCustom()
-                          .setStyleByEnum(context, StyleTextEnum.bodyCard)
-                          .copyWith(
-                            fontSize: 12,
-                            height: 15 / 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  bill.bankName != null
-                      ? TextWidget(
-                          padding: 0,
-                          text: "**** " +
-                              bill.cardNumber!
-                                  .substring(bill.cardNumber!.length - 4),
-                          style: StyleTextCustom()
-                              .setStyleByEnum(context, StyleTextEnum.bodyCard)
-                              .copyWith(
-                                fontSize: 12,
-                                height: 15 / 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : const SizedBox(),
-                  Expanded(
-                    child: TextWidget(
-                      align: TextAlign.end,
-                      padding: 0,
-                      text: maskFormatter
-                              .maskText((bill.balance?.amount ?? 0)
-                                  .toString()
-                                  .split("")
-                                  .reversed
-                                  .join(""))
-                              .split("")
-                              .reversed
-                              .join("") +
-                          "," +
-                          ((bill.balance?.cents ?? 0) != null
-                              ? " " + (bill.balance?.cents ?? 0).toString()
-                              : " 00") +
-                          " ₽",
-                      style: StyleTextCustom()
-                          .setStyleByEnum(context, StyleTextEnum.bodyCard)
-                          .copyWith(
-                            fontSize: 14,
-                            height: 17 / 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
+          selector: (_, provider) => provider.isHiddenBills);
 
   Widget _schemeWidget(BuildContext _context) => ValueListenableBuilder(
         valueListenable: _schemeLoadingState,
@@ -1161,8 +1328,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
             case LoadingState.loaded:
               return ValueListenableBuilder(
                 valueListenable: _schemeTransactionsList,
-                builder: (BuildContext context, List<Transaction>? _items, _) =>
-                    _schemeFront(_context, _items),
+                builder: (BuildContext context, List<Transaction>? _items, _) {
+                  return _schemeFront(_context, _items);
+                },
               );
           }
         },
@@ -1226,7 +1394,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         ],
       ),
     );
-    ;
   }
 
   Widget _titleScheme(BuildContext _context) => ValueListenableBuilder(
@@ -1348,7 +1515,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                                   .read<HomeScreenBloc>()
                                                   .add(
                                                     UpdateSortEvent(
-                                                        sort: _sort.value),
+                                                        sort: _sort.value,
+                                                        isExpense: _userProvider
+                                                            .isEarnActive),
                                                   );
                                             },
                                             widthCustom: 131.5,
@@ -1385,37 +1554,45 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
       );
 
   Widget _circleInScheme(
-      bool isEmpty,
-      Map<String, Map<String, Transaction>> _byCategory,
-      Map<String, OperationCategory> _categories,
-      List<Transaction>? _items,
-      double _fullPrice) {
+    bool isEmpty,
+    Map<String, Map<String, Transaction>> _byCategory,
+    Map<String, OperationCategory> _categories,
+    List<Transaction>? _items,
+    double _fullPrice,
+  ) {
     Map<double, List<PieChartSectionData>> _l =
         <double, List<PieChartSectionData>>{};
 
-    var _c = _categories.values.forEach((section) {
+    _categories.values.forEach((section) {
       var t = _byCategory[section.id]!
           .values
           .map((transaction) => _calc(transaction))
           .toList();
       var v = t.isNotEmpty ? t.reduce((double a, double b) => a + b) : 0.0;
+
       if (!_l.containsKey(t.isNotEmpty ? t.reduce((a, b) => a + b) : 0)) {
         _l[v] = [];
       }
+
+      final i = _categories.values.toList().indexOf(section);
+      final isTouched = i == touchedIndex;
+
       _l[v]!.add(PieChartSectionData(
         value: _calcPercent(
             _fullPrice, t.isNotEmpty ? t.reduce((a, b) => a + b) : 0),
         color: Color(int.parse("0xFF" + section.color.hex.substring(1))),
         showTitle: false,
         borderSide: BorderSide(
-          width: 3,
+          width: isTouched ? 0.5 : 2,
           color: StyleColorCustom().setStyleByEnum(
             context,
-            StyleColorEnum.secondaryBackground,
+            isTouched
+                ? StyleColorEnum.secondaryBackgroundReverse
+                : StyleColorEnum.secondaryBackground,
           ),
         ),
       ));
-    }); //).toList();
+    });
 
     final sorted =
         SplayTreeMap<double, dynamic>.from(_l, (a, b) => a.compareTo(b));
@@ -1425,43 +1602,71 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
     sorted.forEach((key, value) {
       _cats.addAll(value);
     });
-
-    return Expanded(
+    return Center(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          SizedBox(
-            height: 240,
-            child: PieChart(
-              PieChartData(
-                startDegreeOffset: 270,
-                borderData: FlBorderData(
-                  show: false,
-                ),
-                sectionsSpace: 0,
-                centerSpaceRadius: 70,
-                sections: !isEmpty
-                    ? _cats.reversed.toList()
-                    : [
-                        PieChartSectionData(
-                          value: 100,
-                          color: Colors.grey,
-                          showTitle: false,
-                          borderSide: BorderSide(
-                            width: 3,
-                            color: StyleColorCustom().setStyleByEnum(
-                              context,
-                              StyleColorEnum.secondaryBackground,
-                            ),
-                          ),
-                        )
-                      ],
-              ),
-            ),
-          ),
           Column(
             children: [
-              _incomeWidget(!isEmpty
+              SizedBox(
+                height: 240,
+                width: 240,
+                child: PieChart(
+                  swapAnimationDuration: Duration(milliseconds: 500),
+                  PieChartData(
+                    startDegreeOffset: 270,
+                    borderData: FlBorderData(show: false),
+                    pieTouchData: (PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                      setState(() {
+                        if (pieTouchResponse == null ||
+                            pieTouchResponse.touchedSection == null) {
+                          return;
+                        }
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!.touchedSectionIndex;
+                      });
+                    })),
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 70,
+                    sections: !isEmpty
+                        ? _cats
+                        : [
+                            PieChartSectionData(
+                              value: 100,
+                              color: Colors.grey,
+                              showTitle: false,
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: StyleColorCustom().setStyleByEnum(
+                                  context,
+                                  StyleColorEnum.secondaryBackground,
+                                ),
+                              ),
+                            )
+                          ],
+                  ),
+                ),
+              ),
+              AnimatedCrossFade(
+                firstChild: Text(
+                  "",
+                  style: StyleTextCustom()
+                      .setStyleByEnum(context, StyleTextEnum.titleCard),
+                ),
+                secondChild: Text(
+                  touchedIndex == -1 ? "": _categories.values.toList()[touchedIndex].name,
+                  style: StyleTextCustom()
+                      .setStyleByEnum(context, StyleTextEnum.titleCard),
+                ),
+                duration: Duration(milliseconds: 500),
+                reverseDuration: Duration(seconds: 500),
+                crossFadeState: touchedIndex == -1 ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+              ),
+            ],
+          ),
+          (_userProvider.isEarnActive
+              ? _incomeWidget(!isEmpty
                   ? _items
                           ?.map((transaction) => transaction.action ==
                                       TransactionTypes.DEPOSIT ||
@@ -1475,39 +1680,26 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                           .toList()
                           .reduce((a, b) => a + b) ??
                       0.0
-                  : 0),
-              _consumptionWidget(!isEmpty
-                  ? _items
-                          ?.map((transaction) => transaction.action ==
-                                      TransactionTypes.WITHDRAW ||
-                                  transaction.action ==
-                                      TransactionTypes.SPEND //
-                              ? transaction.sum != null && transaction.sum != 0
-                                  ? transaction.sum!.roundToDouble()
-                                  : double.parse(
-                                          "${transaction.amount?.amount ?? 0}.${transaction.amount?.cents ?? 0}")
-                                      .roundToDouble()
-                              : 0.0)
-                          .toList()
-                          .reduce((a, b) => a + b) ??
-                      0.0
-                  : 0),
-              // ? _items
-              //         ?.where((transaction) =>
-              //             transaction.action == TransactionTypes.WITHDRAW ||
-              //             transaction.action == TransactionTypes.SPEND)
-              //         .map((transaction) => transaction.sum != null &&
-              //                 transaction.sum != 0
-              //             ? transaction.sum!.roundToDouble()
-              //             : double.parse(
-              //                     "${transaction.amount!.amount}.${transaction.amount!.cents}")
-              //                 .roundToDouble())
-              //         .toList()
-              //         .reduce((a, b) => a + b) ??
-              //     0.0
-              // : 0),
-            ],
-          )
+                  : 0)
+              : _consumptionWidget(
+                  !isEmpty
+                      ? _items
+                              ?.map((transaction) => transaction.action ==
+                                          TransactionTypes.WITHDRAW ||
+                                      transaction.action ==
+                                          TransactionTypes.SPEND //
+                                  ? transaction.sum != null &&
+                                          transaction.sum != 0
+                                      ? transaction.sum!.roundToDouble()
+                                      : double.parse(
+                                              "${transaction.amount?.amount ?? 0}.${transaction.amount?.cents ?? 0}")
+                                          .roundToDouble()
+                                  : 0.0)
+                              .toList()
+                              .reduce((a, b) => a + b) ??
+                          0.0
+                      : 0,
+                )),
         ],
       ),
     );
@@ -1518,7 +1710,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         <String, Map<String, Transaction>>{};
     Map<String, OperationCategory> _categories = <String, OperationCategory>{};
     bool isEmpty = true;
-
     final double _fullPrice = (items != null && items.isNotEmpty)
         ? items
             .map((transaction) => transaction.action == TransactionTypes.SPEND
@@ -1616,63 +1807,42 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ContainerCustom(
-            child: Column(
+            child: Stack(
+              alignment: Alignment.bottomRight,
               children: [
-                _titleScheme(_context),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          late CalendarSortTypes _filter;
-                          switch (_sortTypeState.value) {
-                            case CalendarSortTypes.currentMonth:
-                            case CalendarSortTypes.lastMonth:
-                            case CalendarSortTypes.customMonth:
-                              _filter = CalendarSortTypes.customMonth;
-                              break;
-                            case CalendarSortTypes.currentWeek:
-                            case CalendarSortTypes.lastWeek:
-                            case CalendarSortTypes.customWeek:
-                              _filter = CalendarSortTypes.customWeek;
-                              break;
-                            case CalendarSortTypes.rangeDates:
-                              _filter = CalendarSortTypes.rangeDates;
-                              break;
-                          }
-
-                          if (_debounce?.isActive ?? false) _debounce!.cancel();
-                          _debounce =
-                              Timer(const Duration(milliseconds: 500), () {
-                            context.read<HomeScreenBloc>().add(
-                                  UpdateSortEvent(
-                                    sort: _filter,
-                                    prev: true,
-                                  ),
-                                );
-                          });
-                        },
-                        child: Icon(
-                          Icons.chevron_left_outlined,
-                          size: 40,
-                          color: StyleColorCustom().setStyleByEnum(
-                              context, StyleColorEnum.colorIcon),
-                        ),
-                      ),
-                      _circleInScheme(
-                        isEmpty,
-                        _byCategory,
-                        _categories,
-                        items,
-                        _fullPrice,
-                      ),
-                      ValueListenableBuilder(
-                        valueListenable: _nextIsVisible,
-                        builder: (BuildContext context, bool _isActive, _) =>
-                            _isActive
-                                ? GestureDetector(
+                Column(
+                  children: [
+                    _titleScheme(_context),
+                    BlocBuilder<HomeScreenBloc, HomeScreenState>(
+                      builder: (context, state) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Stack(
+                            children: [
+                              (state is ListLoadingState ||
+                                      state is UpdateBillList)
+                                  ? Center(
+                                      child: SizedBox(
+                                        height: 240.0,
+                                        width: double.infinity,
+                                        child: Center(
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
+                                        ),
+                                      ),
+                                    )
+                                  : _circleInScheme(
+                                      isEmpty,
+                                      _byCategory,
+                                      _categories,
+                                      items,
+                                      _fullPrice,
+                                    ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onTap: () {
                                       late CalendarSortTypes _filter;
@@ -1694,31 +1864,126 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                               CalendarSortTypes.rangeDates;
                                           break;
                                       }
+
                                       if (_debounce?.isActive ?? false)
                                         _debounce!.cancel();
                                       _debounce = Timer(
-                                          const Duration(milliseconds: 500),
-                                          () {
-                                        context.read<HomeScreenBloc>().add(
-                                              UpdateSortEvent(
-                                                sort: _filter,
-                                                next: true,
-                                              ),
-                                            );
-                                      });
+                                        const Duration(milliseconds: 500),
+                                        () {
+                                          context.read<HomeScreenBloc>().add(
+                                                UpdateSortEvent(
+                                                    sort: _filter,
+                                                    prev: true,
+                                                    isExpense: _userProvider
+                                                        .isEarnActive),
+                                              );
+                                        },
+                                      );
                                     },
                                     child: Icon(
-                                      Icons.chevron_right_outlined,
+                                      Icons.chevron_left_outlined,
                                       size: 40,
                                       color: StyleColorCustom().setStyleByEnum(
                                           context, StyleColorEnum.colorIcon),
                                     ),
-                                  )
-                                : Container(
-                                    width: 40,
                                   ),
-                      ),
-                    ],
+                                  SizedBox(height: 240.0),
+                                  ValueListenableBuilder(
+                                    valueListenable: _nextIsVisible,
+                                    builder: (BuildContext context,
+                                            bool _isActive, _) =>
+                                        _isActive
+                                            ? GestureDetector(
+                                                behavior:
+                                                    HitTestBehavior.translucent,
+                                                onTap: () {
+                                                  late CalendarSortTypes
+                                                      _filter;
+                                                  switch (
+                                                      _sortTypeState.value) {
+                                                    case CalendarSortTypes
+                                                        .currentMonth:
+                                                    case CalendarSortTypes
+                                                        .lastMonth:
+                                                    case CalendarSortTypes
+                                                        .customMonth:
+                                                      _filter =
+                                                          CalendarSortTypes
+                                                              .customMonth;
+                                                      break;
+                                                    case CalendarSortTypes
+                                                        .currentWeek:
+                                                    case CalendarSortTypes
+                                                        .lastWeek:
+                                                    case CalendarSortTypes
+                                                        .customWeek:
+                                                      _filter =
+                                                          CalendarSortTypes
+                                                              .customWeek;
+                                                      break;
+                                                    case CalendarSortTypes
+                                                        .rangeDates:
+                                                      _filter =
+                                                          CalendarSortTypes
+                                                              .rangeDates;
+                                                      break;
+                                                  }
+                                                  if (_debounce?.isActive ??
+                                                      false)
+                                                    _debounce!.cancel();
+                                                  _debounce = Timer(
+                                                      const Duration(
+                                                          milliseconds: 500),
+                                                      () {
+                                                    Logger().i("message0");
+                                                    context
+                                                        .read<HomeScreenBloc>()
+                                                        .add(
+                                                          UpdateSortEvent(
+                                                              sort: _filter,
+                                                              next: true,
+                                                              isExpense:
+                                                                  _userProvider
+                                                                      .isEarnActive),
+                                                        );
+                                                    Logger().i("message");
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  Icons.chevron_right_outlined,
+                                                  size: 40,
+                                                  color: StyleColorCustom()
+                                                      .setStyleByEnum(
+                                                          context,
+                                                          StyleColorEnum
+                                                              .colorIcon),
+                                                ),
+                                              )
+                                            : Container(width: 40),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: IconButton(
+                    onPressed: () {
+                      final bloc = context.read<HomeScreenBloc>();
+                      if (_userProvider.isEarnActive) {
+                        bloc.add(UpdateSchemeTypeEvent(isExpense: false));
+                        _userProvider.setIsEarnActive = false;
+                      } else {
+                        bloc.add(UpdateSchemeTypeEvent(isExpense: true));
+                        _userProvider.setIsEarnActive = true;
+                      }
+                    },
+                    icon: Icon(CupertinoIcons.repeat),
                   ),
                 ),
               ],
@@ -1731,8 +1996,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
   }
 
   double _calcPercent(double fullPrice, double reduce) {
-    final double share = fullPrice / 100;
-    return reduce / share;
+    final double share = (reduce / fullPrice) * 100;
+    return share;
   }
 
   Widget _incomeWidget(double value) => Row(
@@ -1740,17 +2005,14 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: TextWidget(
-                  padding: 0,
-                  text: textString_63,
-                  style: StyleTextCustom()
-                      .setStyleByEnum(context, StyleTextEnum.bodyCard),
-                ),
+              TextWidget(
+                padding: 0,
+                text: textString_63,
+                style: StyleTextCustom()
+                    .setStyleByEnum(context, StyleTextEnum.bodyCard),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -1941,7 +2203,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                   ),
                                 );
                             _context.read<HomeScreenBloc>().add(
-                                  UpdateSortEvent(sort: _sortTypeState.value),
+                                  UpdateSortEvent(
+                                      sort: _sortTypeState.value,
+                                      isExpense: _userProvider.isEarnActive),
                                 );
                           }
                         },
@@ -2029,4 +2293,203 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           maxLines: 1,
         ),
       );
+
+  Column _bottomSheet() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomBottomSheet.topDividerBottomSheet(),
+        _bottomSheetButtons("Изменить запланированный расход", 0),
+        _bottomSheetButtons("Изменить запланированный доход", 1),
+        _bottomSheetButtons("Сбросить все", 2),
+        SizedBox(height: 50),
+      ],
+    );
+  }
+
+  Padding _bottomSheetButtons(
+    String text,
+    int index,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: MaterialButton(
+        color: _brightness != Brightness.light
+            ? CustomColors.darkSecondaryBackground.withOpacity(0.8)
+            : Colors.grey.shade100,
+        elevation: 1,
+        minWidth: double.infinity,
+        height: 50,
+        textColor: index != 2
+            ? _brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black
+            : Colors.red,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: index == 0 ? const Radius.circular(8) : Radius.zero,
+              bottom: index == 2 ? const Radius.circular(8) : Radius.zero,
+            ),
+            side: BorderSide(color: Colors.white.withOpacity(0.01))),
+        onPressed: () {
+          final _bloc = context.read<HomeScreenBloc>();
+          Navigator.pop(context);
+          if (index == 2) {
+            _bloc.add(UpdateSpendEarnEvent(plannedEarn: 0, plannedSpend: 0));
+          } else {
+            String header = index == 0
+                ? "Изменить запланированный расход"
+                : "Изменение запланированного дохода";
+            String description = index == 0
+                ? "Запланированный расход позволяет контролировать ваши операции по расходам. Для установки запланированного расхода введите сумму, которая будет означать ваш план по доходам на этот месяц."
+                : "Запланированный доход позволяет контролировать ваши операции по пополнению счетов. Для установки запланированного дохода введите сумму, которая будет означать ваш план по доходам на этот месяц.";
+
+            TextEditingController spendEarnController = TextEditingController();
+            Logger().w("message");
+
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: StyleColorCustom().setStyleByEnum(
+                context,
+                StyleColorEnum.secondaryBackground,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(10.0),
+                ),
+              ),
+              builder: (context) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: _bottomSheetWithCategory(
+                  index: index,
+                  header: header,
+                  description: description,
+                  controller: spendEarnController,
+                ),
+              ),
+            );
+          }
+        },
+        child: Row(
+          mainAxisAlignment: index == 2
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+                child: TextWidget(
+                    text: text,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    align: TextAlign.center)),
+            index == 1
+                ? const Icon(
+                    Icons.arrow_drop_up_outlined,
+                    color: CustomColors.blue,
+                    size: 30,
+                  )
+                : index == 0
+                    ? const Icon(
+                        Icons.arrow_drop_down,
+                        color: CustomColors.pink,
+                        size: 30,
+                      )
+                    : SizedBox.shrink(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Column _bottomSheetWithCategory({
+    required int index,
+    required String header,
+    required String description,
+    required TextEditingController controller,
+  }) {
+    late int price;
+    Logger().i("message");
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(child: CustomBottomSheet.topDividerBottomSheet()),
+        Text(
+          header,
+          style: GoogleFonts.montserrat(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: _brightness == Brightness.dark ? Colors.white : Colors.black,
+          ),
+        ),
+        SizedBox(height: 30.0),
+        Text(
+          description,
+          style: GoogleFonts.montserrat(
+            fontSize: 13,
+            color: _brightness == Brightness.dark ? Colors.white : Colors.black,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+            top: 30.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: "Сумма",
+              hintStyle: TextStyle(fontSize: 13),
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 10,
+              ),
+            ),
+            keyboardType: TextInputType.number,
+            style: TextStyle(
+              color:
+                  _brightness == Brightness.dark ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
+        Visibility(
+          visible: MediaQuery.of(context).viewInsets.bottom == 0,
+          child: Column(
+            children: [
+              SizedBox(height: 30.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ButtonCancel(
+                    text: "Сбросить",
+                    onPressed: () {
+                      final _bloc = context.read<HomeScreenBloc>();
+                      index == 0
+                          ? _bloc.add(UpdateSpendEarnEvent(plannedSpend: 0))
+                          : _bloc.add(UpdateSpendEarnEvent(plannedEarn: 0));
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ButtonPink(
+                    text: "Сохранить",
+                    onPressed: () {
+                      final _bloc = context.read<HomeScreenBloc>();
+                      index == 0
+                          ? _bloc.add(UpdateSpendEarnEvent(
+                              plannedSpend: int.parse(controller.text)))
+                          : _bloc.add(UpdateSpendEarnEvent(
+                              plannedEarn: int.parse(controller.text)));
+
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20.0),
+      ],
+    );
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/transaction_interactor.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';
@@ -106,8 +107,8 @@ class CategoriesOpenBloc
     DateTime end,
   ) async {
     Map<String, String> body = <String, String>{
-      "startDate": start.toIso8601String() + "+00:00",
-      "endDate": end.toIso8601String() + "+00:00",
+      "startDate": start.toIso8601String() + "Z",
+      "endDate": end.toIso8601String() + "Z",
     };
     return await TransactionInteractor().abstractAllTransactions(
       token: token,

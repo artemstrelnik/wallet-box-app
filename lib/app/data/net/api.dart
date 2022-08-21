@@ -7,7 +7,6 @@ import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:http_parser/http_parser.dart';
 
-
 bool trustSelfSigned = true;
 HttpClient httpClient = HttpClient()
   ..badCertificateCallback =
@@ -87,6 +86,8 @@ class Session {
       body: jsonEncode(body).replaceAll('\\', ''),
     );
 
+    Logger().i(response.body.toString());
+
     Logger().d("""Тип запроса: Post
     Ссылка: ${uri.toString()}
     Тело запроса: ${body.toString()}
@@ -158,16 +159,22 @@ class Session {
     required Map<String, dynamic> body,
     required String url,
   }) async {
+    Logger().w(url.toString());
     final Uri uri = Uri.https(
       _baseUrl,
       url,
     );
+
+    Logger().i(url.toString());
+    Logger().i(body.toString());
 
     Response response = await ioClient.post(
       uri,
       headers: headers,
       body: jsonEncode(body).replaceAll('\\', ''),
     );
+
+    Logger().w(response.body.toString());
 
     Logger().d("""Тип запроса: Post
     Ссылка: ${uri.toString()}
@@ -198,10 +205,15 @@ class Session {
       queryParameters,
     );
 
+    Logger().e(uri.toString());
+    Logger().e(queryParameters.toString());
+
     Response response = await ioClient.get(
       uri,
       headers: headers,
     );
+
+    Logger().i(response.body.toString());
 
     Logger().d("""Тип запроса: Get
     Ссылка: ${uri.toString()}
@@ -229,10 +241,7 @@ class Session {
       _baseUrl,
       url,
     );
-    Logger().i(uri.toString());
 
-    Logger().i(body.toString());
-    Logger().i(headers);
     late Response response;
     try {
       response = await ioClient.patch(
@@ -244,7 +253,7 @@ class Session {
       print('No Internet connection 😑 $e');
     }
 
-    // Logger().i(response.body.toString());
+    Logger().i(response.body.toString());
 
     Logger().d("""Тип запроса: Patch
     Ссылка: ${uri.toString()}

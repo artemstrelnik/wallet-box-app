@@ -97,3 +97,4 @@ const textString_87 = 'Сегодня';
 const textString_88 = '-450.00 ₽';
 const textString_89 = '**** 1234';
 const textString_90 = 'Всего: -43 950 ₽';
+const textString_91 = 'Привязать Google аккаунт';

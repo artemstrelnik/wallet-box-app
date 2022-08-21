@@ -2,8 +2,13 @@ import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 
+import '../../data/net/models/permission_role_provider.dart';
+import '../../data/net/models/user_auth_model.dart';
+
 abstract class HomeScreenState {
-  const HomeScreenState();
+  final bool isExpense;
+
+  const HomeScreenState({this.isExpense = true});
 }
 
 class ListLoadingState extends HomeScreenState {
@@ -64,5 +69,16 @@ class NeedUpdateBillsListState extends HomeScreenState {
 
 class UpdateSelectedBill extends HomeScreenState {
   const UpdateSelectedBill({required this.bill});
+
   final String bill;
+}
+
+class UpdateCircleSchemeState extends HomeScreenState {
+  const UpdateCircleSchemeState(bool isExpense) : super(isExpense: isExpense);
+}
+
+class UpdateUserState extends HomeScreenState {
+  final User user;
+
+  const UpdateUserState({required this.user});
 }

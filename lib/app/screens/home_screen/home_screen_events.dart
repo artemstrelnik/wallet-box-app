@@ -7,8 +7,9 @@ abstract class HomeScreenEvent {
 }
 
 class PageOpenedEvent extends HomeScreenEvent {
-  const PageOpenedEvent({this.user});
+  const PageOpenedEvent({this.user, required this.isExpense});
 
+  final bool isExpense;
   final UserNotifierProvider? user;
 }
 
@@ -28,14 +29,17 @@ class UpdateSortEvent extends HomeScreenEvent {
     //this.bill,
     this.billChange = false,
     this.billId,
+    required this.isExpense,
   });
 
   final bool? next;
   final bool? prev;
   final CalendarSortTypes sort;
+
   //final Bill? bill;
   final String? billId;
   final bool billChange;
+  final bool isExpense;
 }
 
 class BillRemoveEvent extends HomeScreenEvent {
@@ -67,4 +71,27 @@ class RemoveTransaction extends HomeScreenEvent {
   const RemoveTransaction({required this.transaction});
 
   final String? transaction;
+}
+
+class UpdateSchemeTypeEvent extends HomeScreenEvent {
+  final bool isExpense;
+
+  const UpdateSchemeTypeEvent({required this.isExpense});
+}
+
+class UpdateSpendEarnEvent extends HomeScreenEvent {
+  int? plannedSpend;
+  int? plannedEarn;
+
+  UpdateSpendEarnEvent({this.plannedSpend, this.plannedEarn});
+}
+
+class UpdateBillHiddenEvent extends HomeScreenEvent {
+  const UpdateBillHiddenEvent({
+    required this.id,
+    required this.isHidden,
+  });
+
+  final String id;
+  final bool isHidden;
 }

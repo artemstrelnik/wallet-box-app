@@ -6,18 +6,19 @@ class UserAuthModel {
     required this.status,
     this.data,
     this.message,
-    this.error,
+    this.advices,
   });
+
   late final int status;
   late final Data? data;
   late final String? message;
-  late final String? error;
+  late final List? advices;
 
   UserAuthModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     data = json['data'] != null ? Data.fromJson(json['data']) : null;
     message = json['message'];
-    error = json['error'];
+    advices = json['advices'];
   }
 }
 
@@ -26,6 +27,7 @@ class Data {
     required this.token,
     required this.user,
   });
+
   late final String token;
   late final User user;
 
@@ -46,7 +48,10 @@ class User {
     required this.touchID,
     required this.faceID,
     required this.pinCode,
+    required this.plannedEarn,
+    required this.plannedSpend,
   });
+
   late final String id;
   late final String? username;
   late final Role role;
@@ -56,6 +61,9 @@ class User {
   late final bool touchID;
   late final bool faceID;
   late final String pinCode;
+  late final bool googleLink;
+  late final int plannedSpend;
+  late final int plannedEarn;
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -67,6 +75,9 @@ class User {
     touchID = json['touchID'] ?? false;
     faceID = json['faceID'] ?? false;
     pinCode = json['pinCode'] ?? "";
+    googleLink = json['googleLink'] ?? false;
+    plannedSpend = json['plannedSpend'];
+    plannedEarn = json['plannedEarn'];
   }
 }
 
@@ -75,6 +86,7 @@ class UserEmail {
     required this.address,
     required this.activated,
   });
+
   late final String? address;
   late final bool activated;
 
@@ -90,6 +102,7 @@ class Role {
     required this.name,
     required this.autoApply,
   });
+
   late final String id;
   late final String name;
   late final bool autoApply;

@@ -1,9 +1,12 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/src/provider.dart';
@@ -14,6 +17,7 @@ import 'package:wallet_box/app/bloc/my_app_page.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
+import 'package:wallet_box/app/core/generals_widgets/dialog.dart';
 import 'package:wallet_box/app/core/generals_widgets/scaffold_app_bar.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
 import 'package:wallet_box/app/core/generals_widgets/text_field.dart';
@@ -52,6 +56,7 @@ enum _EditState {
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
+
   @override
   _SettingScreenState createState() => _SettingScreenState();
 }
@@ -67,6 +72,7 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
   final _formKey = GlobalKey<FormState>();
   final password = RandomPasswordGenerator();
 
+  final ValueNotifier<bool> _googleNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _pinCodeNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _touchIDNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _noificationsNotifier = ValueNotifier<bool>(false);
@@ -156,7 +162,7 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
                 child: MyApp(),
               ),
             ),
-            (route) => route.isFirst,
+            (route) => false,
           );
         }
         if (state is UpdateCurrenciesList) {
@@ -174,6 +180,7 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
           _pinCodeNotifier.value = state.user.pinCode.isNotEmpty;
           _phoneController.text =
               _phoneMaskFormatter.maskText(state.user.username ?? "");
+          _googleNotifier.value = state.user.googleLink;
           _emailController.text = state.user.email.address ?? "";
           //_noificationsNotifier.value = state.user.notificationsEnable;
           _currencyNotifier.value = _currencies
@@ -418,6 +425,7 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
           _subscriptionWidget(),
           _phoneEditWidget(),
           _emailEditWidget(),
+          _logInGoogleWidget(),
           _notificationsWidget(),
           _themeWidget(),
           ValueListenableBuilder(
@@ -592,6 +600,7 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
           ),
         ),
       );
+
   Widget _emailEditWidget() => ValueListenableBuilder(
         valueListenable: _emailEditState,
         builder: (BuildContext context, _EditState _state, _) => Form(
@@ -719,6 +728,64 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
                             },
                           ),
                         );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _logInGoogleWidget() => ValueListenableBuilder(
+        valueListenable: _googleNotifier,
+        builder: (BuildContext context, bool _stateGoogle, _) =>
+            ContainerCustom(
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0, top: 2.0),
+                child: Icon(
+                  Icons.email_outlined,
+                  color: StyleColorCustom()
+                      .setStyleByEnum(context, StyleColorEnum.colorIcon),
+                ),
+              ),
+              Expanded(
+                child: TextWidget(
+                    padding: 0,
+                    text: textString_91,
+                    style: StyleTextCustom()
+                        .setStyleByEnum(context, StyleTextEnum.bodyCard)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: CupertinoSwitch(
+                  activeColor: _userProvider.user?.type.name != "GOOGLE"
+                      ? CustomColors.pink
+                      : CustomColors.pink.withOpacity(0.5),
+                  trackColor: StyleColorCustom().setStyleByEnum(
+                      context, StyleColorEnum.cupertinoSwitchTrackColor),
+                  thumbColor: _userProvider.user?.type.name != "GOOGLE"
+                      ? StyleColorCustom().setStyleByEnum(
+                          context,
+                          StyleColorEnum.cupertinoSwitchThumbColor,
+                        )
+                      : Colors.white.withOpacity(0.5),
+                  value: _userProvider.user?.type.name == "GOOGLE"
+                      ? true
+                      : _stateGoogle,
+                  onChanged: (bool value) async {
+                    final _bloc = context.read<SettingScreenBloc>();
+                    GoogleSignInAccount? _userInfo;
+                    if (_userProvider.user?.type.name != "GOOGLE") {
+                      if (value) {
+                        _bloc.add(UpdateLoadingEvent(loading: true));
+                        _userInfo = await signInWithGoogle();
+                        _bloc.add(UpdateLoadingEvent(loading: false));
+                      }
+                      _bloc.add(UpdateGoogleAuthEvent(googleId: _userInfo?.id));
+                    }
+                    _googleNotifier.value = value;
                   },
                 ),
               ),
@@ -960,4 +1027,49 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
           ],
         ),
       );
+
+  Future<GoogleSignInAccount?> signInWithGoogle() async {
+    try {
+      Logger().i("Login google");
+      // Trigger the authentication flow
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      Logger().i(googleUser.toString());
+
+      // Create a new credential
+      final OAuthCredential? credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      if (credential != null) {
+        return googleUser;
+      }
+      return null;
+    } on PlatformException catch (e) {
+      late String errorMessage;
+      if (e.code == GoogleSignIn.kNetworkError) {
+        errorMessage =
+            "A network error (such as timeout, interrupted connection or unreachable host) has occurred.";
+      } else {
+        errorMessage = "Unable to sign in, please try again!";
+      }
+      await CustomDialog.dialogError(
+        context: context,
+        title: "Error registering with Google",
+        message: errorMessage,
+      );
+    } catch (e) {
+      await CustomDialog.dialogError(
+        context: context,
+        title: "Error registering with Google",
+        message: "Unable to sign in, please try again!",
+      );
+    }
+  }
 }

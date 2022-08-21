@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:app_links/app_links.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -112,6 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   _SupportState _supportState = _SupportState.unknown;
 
   late UserNotifierProvider _userProvider;
+
   // late RolePermissionProvider _permissionsProvider;
   late ShowAlertProvider _showAlertProvider;
 
@@ -131,9 +135,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           (bool isSupported) => _supportState =
               isSupported ? _SupportState.supported : _SupportState.unsupported,
         );
-    context.read<MyAppBloc>().add(
-          PageOpenedEvent(),
-        );
+    context.read<MyAppBloc>().add(PageOpenedEvent());
 
     WidgetsBinding.instance.addObserver(this);
 
@@ -403,85 +405,91 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           },
           child: ThemeProvider(
             initTheme: initTheme,
-            builder: (_, myTheme) => MaterialApp(
-              navigatorKey: _navigatorKey,
-              onGenerateRoute: (RouteSettings settings) {
-                //Widget routeWidget = MikhailovskyApp();
-                final routeName = settings.name;
-                if (routeName != null) {
-                  if (routeName.startsWith('code')) {
-                    final String? _code = routeName.substring(
-                      routeName.indexOf('=') + 1,
-                    );
-                    if (_code != null && _code.isNotEmpty) {
-                      return MaterialPageRoute(
-                        builder: (context) => BlocProvider(
-                          create: (context) => AddInvoiceBloc(),
-                          child: SingleBankPage(
-                            bank: BankTypes.tochka,
-                            code: _code,
-                          ),
-                        ),
-                        //settings: settings,
-                        //fullscreenDialog: true,
+            builder: (_, myTheme) => DevicePreview(
+              enabled: !kReleaseMode,
+              builder: (context) => MaterialApp(
+                navigatorKey: _navigatorKey,
+                useInheritedMediaQuery: true,
+                locale: DevicePreview.locale(context),
+                builder: DevicePreview.appBuilder,
+                onGenerateRoute: (RouteSettings settings) {
+                  //Widget routeWidget = MikhailovskyApp();
+                  final routeName = settings.name;
+                  if (routeName != null) {
+                    if (routeName.startsWith('code')) {
+                      final String? _code = routeName.substring(
+                        routeName.indexOf('=') + 1,
                       );
+                      if (_code != null && _code.isNotEmpty) {
+                        return MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => AddInvoiceBloc(),
+                            child: SingleBankPage(
+                              bank: BankTypes.tochka,
+                              code: _code,
+                            ),
+                          ),
+                          //settings: settings,
+                          //fullscreenDialog: true,
+                        );
+                      }
+                    }
+                    if (routeName.startsWith('type')) {
+                      final String? _value = routeName.substring(
+                        routeName.indexOf('=') + 1,
+                      );
+                      context.read<MyAppBloc>().add(
+                            OpenOperationEvent(
+                              type: OperationType.values
+                                  .where((e) => e.name == _value)
+                                  .first,
+                            ),
+                          );
                     }
                   }
-                  if (routeName.startsWith('type')) {
-                    final String? _value = routeName.substring(
-                      routeName.indexOf('=') + 1,
-                    );
-                    context.read<MyAppBloc>().add(
-                          OpenOperationEvent(
-                            type: OperationType.values
-                                .where((e) => e.name == _value)
-                                .first,
-                          ),
-                        );
-                  }
-                }
-              },
-              initialRoute: "/",
-              routes: {},
-              theme: myTheme,
-              debugShowCheckedModeBanner: false,
-              home: ValueListenableBuilder(
-                valueListenable: _initApp,
-                builder: (BuildContext context, _UserState _state, _) {
-                  switch (_state) {
-                    case _UserState.password:
-                      return BlocProvider(
-                        create: (context) => AuthCodeBloc(
-                          phone: _userProvider.user!.username ?? "",
-                          isExists: true,
-                          isPassword: true,
-                        ),
-                        child: const AuthPhoneCode(),
-                      );
-                    case _UserState.not_authorized:
-                      return BlocProvider(
-                        create: (context) => AuthBloc(),
-                        child: const AuthPhone(),
-                      );
-                    case _UserState.authorized:
-                      return BlocProvider(
-                        create: (context) => HomeScreenBloc(),
-                        child: const HomeScreen(),
-                      );
-                    case _UserState.pin_code:
-                      return BlocProvider(
-                        create: (context) => PinCodeBloc(),
-                        child: const PinCodePage(isStart: true),
-                      );
-                    case _UserState.new_authorized:
-                      return BlocProvider(
-                        create: (context) => AppAuthBloc(),
-                        child: AppAuthPage(),
-                      );
-                    default:
-                      return const SplashScreen();
-                  }
                 },
+                initialRoute: "/",
+                routes: {},
+                theme: myTheme,
+                debugShowCheckedModeBanner: false,
+                home: ValueListenableBuilder(
+                  valueListenable: _initApp,
+                  builder: (BuildContext context, _UserState _state, _) {
+                    switch (_state) {
+                      case _UserState.password:
+                        return BlocProvider(
+                          create: (context) => AuthCodeBloc(
+                            phone: _userProvider.user!.username ?? "",
+                            isExists: true,
+                            isPassword: true,
+                          ),
+                          child: const AuthPhoneCode(),
+                        );
+                      case _UserState.not_authorized:
+                        return BlocProvider(
+                          create: (context) => AuthBloc(),
+                          child: const AuthPhone(),
+                        );
+                      case _UserState.authorized:
+                        return BlocProvider(
+                          create: (context) => HomeScreenBloc(),
+                          child: const HomeScreen(),
+                        );
+                      case _UserState.pin_code:
+                        return BlocProvider(
+                          create: (context) => PinCodeBloc(),
+                          child: const PinCodePage(isStart: true),
+                        );
+                      case _UserState.new_authorized:
+                        return BlocProvider(
+                          create: (context) => AppAuthBloc(),
+                          child: AppAuthPage(),
+                        );
+                      default:
+                        return const SplashScreen();
+                    }
+                  },
+                ),
               ),
             ),
           ),

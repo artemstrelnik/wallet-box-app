@@ -155,7 +155,6 @@ class AddOperationScreenBloc
       String? token = await prefs.getString("wallet_box_token");
       if (token != null) {
         _token = token;
-        Logger().w(_selectedBill.toString());
         Map<String, String> _body = {
           "action": event.type.toString().split(".").last,
           "amount": event.sum.split(".").first,
@@ -210,10 +209,7 @@ class AddOperationScreenBloc
       if (token != null) {
         _token = token;
         Map<String, String> _body = {
-          "amount": event.sum.split(",").first,
-          "cents": event.sum.split(",").length == 1
-              ? "0"
-              : event.sum.split(",").last,
+          "amount": event.sum,
         };
         if (event.desc.isNotEmpty) {
           _body["description"] = event.desc;
@@ -229,22 +225,25 @@ class AddOperationScreenBloc
           _body["categoryId"] = _selectedCategory!.id;
         }
         _body["time"] = _date.toIso8601String() + "Z";
-
+        Logger().e(_body.toString());
         if (_selectedCategory == null) {
+          Logger().e("GoCatCreate");
           emit(GoCatCreate());
         } else if (_selectedBill == null) {
+          Logger().e("GoBillCreate()");
           emit(GoBillCreate());
         } else {
           Logger().i(_selectedBill?.id.toString());
           Logger().w(_body.toString());
           Logger().w(event.type.toString());
-          final bool? _responce = await BillInteractor().createOperation(
+          final bool? _response = await BillInteractor().createOperation(
             body: _body,
             token: _token,
             billId: _selectedBill!.id,
             type: event.type,
           );
-          if (_responce != null && _responce) {
+          Logger().e(_response.toString());
+          if (_response != null && _response) {
             emit(GoBackEndUpdate());
           }
         }
@@ -274,7 +273,6 @@ class AddOperationScreenBloc
   ) async {
     try {
       _date = event.date;
-      // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
       rethrow;
     }
@@ -300,7 +298,6 @@ class AddOperationScreenBloc
     try {
       _selectedBill = event.bill;
       emit(UpdateSelectedBillState(bill: _selectedBill!));
-      // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
       rethrow;
     }
@@ -318,13 +315,14 @@ class AddOperationScreenBloc
       if (uid != null && token != null) {
         _uid = uid;
         _token = token;
-        final CatigoriesResponce? _categories =
+        final CategoriesResponse? _categories =
             await CategoriesByUidInteractor().execute(
           body: <String, String>{
             "userId": _uid,
           },
           token: _token,
         );
+        Logger().e(_categories.toString());
         if (_categories != null && _categories.status == 200) {
           _categoriesList.addAll(_categories.data);
         }
@@ -366,4 +364,6 @@ class AddOperationScreenBloc
       rethrow;
     }
   }
+
+
 }

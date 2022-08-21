@@ -28,7 +28,6 @@ class MyAppBloc extends Bloc<MyAppEvent, MyAppState> {
 
       final String? uid = prefs.getString("wallet_box_uid");
       final String? token = prefs.getString("wallet_box_token");
-      Logger().i("uid => $uid  token => $token");
 
       if (uid != null && token != null) {
         final UserRegistrationModel? _isUserAuth =

@@ -5,7 +5,7 @@ import 'package:wallet_box/app/data/net/models/categories_responce.dart';
 import '../api.dart';
 
 class CategoryByIdInteractor {
-  Future<CatigoriesResponce?> execute(
+  Future<CategoriesResponse?> execute(
       {required Map<String, String> body, required String token}) async {
     try {
       await Session().setToken(token: token);
@@ -16,7 +16,7 @@ class CategoryByIdInteractor {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        final CatigoriesResponce _result = CatigoriesResponce.fromJson(data);
+        final CategoriesResponse _result = CategoriesResponse.fromJson(data);
         return _result;
       }
       return null;

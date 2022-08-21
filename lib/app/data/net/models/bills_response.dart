@@ -36,6 +36,23 @@ class SingleBillResponse {
   }
 }
 
+class ObjectBillResponse{
+  ObjectBillResponse({
+    required this.status,
+    required this.data,
+    required this.message,
+  });
+  late final int status;
+  late final Bill data;
+  late final String message;
+
+  ObjectBillResponse.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
+    data = Bill.fromJson(json['data']['bill']);
+    message = json['message'];
+  }
+}
+
 class Bill {
   Bill({
     required this.id,
@@ -49,11 +66,12 @@ class Bill {
     this.createdInBank,
     required this.currency,
     this.bankName,
+    required this.hidden,
   });
   late final String id;
   late final String name;
   late final User? user;
-  late final Balance? balance;
+  late final double balance;
 
   late final String? cardNumber;
   late final String? cardId;
@@ -62,13 +80,14 @@ class Bill {
   late final String? createdInBank;
   late final String? currency;
   late BankTypes? bankName;
+  late final bool hidden;
 
   Bill.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'] ?? '';
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     balance =
-        json['balance'] != null ? Balance.fromJson(json['balance']) : null;
+        json['balance'];
 
     cardNumber = json['cardNumber'];
     cardId = json['cardId'];
@@ -82,6 +101,7 @@ class Bill {
                 describeEnum(e) == (json['bankName'] as String).toLowerCase())
             .first
         : null;
+    hidden = json["hidden"];
   }
 }
 
@@ -104,24 +124,3 @@ class Bill {
 //     endDate = null;
 //   }
 // }
-
-class Balance {
-  Balance({
-    required this.amount,
-    required this.cents,
-  });
-  late final int amount;
-  late final int? cents;
-
-  Balance.fromJson(Map<String, dynamic> json) {
-    amount = json['amount'];
-    cents = json['cents'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['amount'] = amount;
-    _data['cents'] = cents;
-    return _data;
-  }
-}

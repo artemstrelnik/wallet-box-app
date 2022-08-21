@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/currenci_model.dart';
 import '../api.dart';
 

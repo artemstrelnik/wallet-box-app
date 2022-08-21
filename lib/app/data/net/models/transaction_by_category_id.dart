@@ -9,6 +9,7 @@ class TransactionsResponce {
     required this.status,
     required this.data,
   });
+
   late final int status;
   late final TransactionsResponcePageInfo data;
 
@@ -23,6 +24,7 @@ class TransactionsResponcePageInfo {
     required this.page,
     required this.total,
   });
+
   late final List<Transaction> page;
   late final int total;
 
@@ -35,6 +37,7 @@ class TransactionsResponcePageInfo {
 class Transaction {
   Transaction({
     required this.id,
+    required this.transactionType,
     required this.action,
     required this.sum,
     required this.description,
@@ -51,7 +54,9 @@ class Transaction {
     this.billName,
     this.billId,
   });
+
   late final String id;
+  late final String transactionType;
   late final TransactionTypes action;
   late double? sum;
   late final String? description;
@@ -62,9 +67,11 @@ class Transaction {
   late final OperationCategory? category;
   late final String? createAt;
   Bill? bill;
+
 //
   late final String? status;
   late final Amount? amount;
+
   //late final String? transactionType;
   late final String? date;
   late final String? billName;
@@ -72,6 +79,7 @@ class Transaction {
 
   Transaction.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    transactionType = json['transactionType'];
     action = json['action'] != null
         ? TransactionTypes.values
             .where((e) => describeEnum(e) == json['action'])
@@ -100,6 +108,7 @@ class Transaction {
   Transaction.clone(Transaction object, Bill bill)
       : this(
           id: object.id,
+          transactionType: object.transactionType,
           action: object.action,
           sum: object.sum,
           description: object.description,
@@ -122,6 +131,7 @@ class Amount {
     required this.amount,
     required this.cents,
   });
+
   late final int amount;
   late final int cents;
 
@@ -136,6 +146,7 @@ class TransactionsResponceNew {
     required this.status,
     required this.data,
   });
+
   late final int status;
   late final Data data;
 
@@ -158,6 +169,7 @@ class Data {
     required this.total,
     required this.totalPages,
   });
+
   late final List<Page> page;
   late final int total;
   late final int totalPages;
@@ -189,6 +201,7 @@ class Page {
     required this.currency,
     required this.billName,
   });
+
   late final String id;
   late final String type;
   late final String description;

@@ -62,11 +62,12 @@ class StyleTextCustom {
         );
       case StyleTextEnum.header:
         return GoogleFonts.montserrat(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-            color: theme == Brightness.light
-                ? CustomColors.lightSecondaryText
-                : CustomColors.darkPrimaryText);
+          fontSize: 34,
+          fontWeight: FontWeight.bold,
+          color: theme == Brightness.light
+              ? CustomColors.lightSecondaryText
+              : CustomColors.darkPrimaryText,
+        );
       case StyleTextEnum.titleCard:
         return GoogleFonts.montserrat(
             fontSize: 14,

@@ -58,25 +58,32 @@ class AppAuthBloc extends Bloc<AppAuthEvent, AppAuthState> {
   ) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-       Logger().i("_startCreateUser");
+
       prefs.remove("wallet_box_uid");
       prefs.remove("wallet_box_token");
       Session().removeToken();
+
+      String email = event.googleUser != null
+          ? event.googleUser!.email
+          : event.appleUser!.user!.email!;
+
+      String id = event.googleUser != null
+          ? event.googleUser!.id
+          : event.appleUser!.user!.uid;
+
       final bool? _isExists = await AuthCheckRegisterInteractor().checkEmail(
-        body: <String, String>{
-          "email": event.info!.user!.email!,
-        },
+        body: <String, String>{"email": email},
       );
       if (_isExists != null && _isExists) {
         final UserAuthModel? _user = await UserAuthInteractor().byEmail(body: {
-          "email": event.info!.user!.email!,
-          "registerCred": event.info!.user!.uid,
+          "email": email,
+          "registerCred": id,
+          "credType": event.type.toString().split(".").last
         });
         if (_user != null && _user.data != null) {
           await prefs.setString("wallet_box_uid", _user.data!.user.id);
           await prefs.setString("wallet_box_token", _user.data!.token);
           prefs.setBool("not_first_launch", true);
-          Logger().i(_user.toString());
           emit(HomeEntryState(user: _user.data!.user));
         } else {
           emit(const ShowDialogState());
@@ -97,17 +104,18 @@ class AppAuthBloc extends Bloc<AppAuthEvent, AppAuthState> {
             //"username": phone.replaceAll(new RegExp(r"\s+\b|\b\s"), ""),
             "password": base64Str,
             "walletType": "RUB",
-            "email": event.info!.user!.email!,
+            "email": email,
             "type": event.type.toString().split(".").last,
-            "registerCred": event.info!.user!.uid,
+            "registerCred": id,
             //"roleName": "forTesting"
           },
         );
         if (_userRegistration != null && _userRegistration.status == 201) {
           final UserAuthModel? _user =
               await UserAuthInteractor().byEmail(body: {
-            "email": event.info!.user!.email!,
-            "registerCred": event.info!.user!.uid,
+            "email": email,
+            "registerCred": id,
+            "credType": event.type.toString().split(".").last,
           });
 
           await prefs.setString("wallet_box_uid", _user!.data!.user.id);
