@@ -88,19 +88,22 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
       builder: (context, _) => BlocListener<AppAuthBloc, AppAuthState>(
         listener: (context, state) {
           if (state is ShowDialogState) {
+            context.read<AuthPageProvider>().updateLoading(false);
             showCupertinoDialog<void>(
               context: context,
-              builder: (BuildContext context) => CupertinoAlertDialog(
-                content: const Text(
-                  "Пользователь с таким телефоном или email уже существует или занят",
-                ),
-                actions: <CupertinoDialogAction>[
-                  CupertinoDialogAction(
-                    child: const Text('Ок'),
-                    onPressed: () => Navigator.pop(context),
+              builder: (BuildContext context) {
+                return CupertinoAlertDialog(
+                  content: const Text(
+                    "Пользователь с таким телефоном или email уже существует или занят",
                   ),
-                ],
-              ),
+                  actions: <CupertinoDialogAction>[
+                    CupertinoDialogAction(
+                      child: const Text('Ок'),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                );
+              },
             );
           }
           if (state is HomeEntryState) {
@@ -184,9 +187,6 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                                                 .updateLoading(true);
                                             final UserCredential _userInfo =
                                                 await signInWithApple();
-                                            context
-                                                .read<AuthPageProvider>()
-                                                .updateLoading(false);
                                             context.read<AppAuthBloc>().add(
                                                   CheckUserEvent(
                                                     appleUser: _userInfo,
@@ -210,6 +210,7 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                                       final provider =
                                           context.read<AuthPageProvider>();
                                       provider.updateLoading(true);
+                                      context.read<AppAuthBloc>().add(PageOpenedEvent());
                                       final GoogleSignInAccount? _userInfo =
                                           await signInWithGoogle(provider);
 
@@ -252,17 +253,17 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                                     backgroundColor: Colors.transparent,
                                     top: 24,
                                     onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => BlocProvider(
-                                                  create: (context) =>
-                                                      PasswordRestoreBloc(),
-                                                  child: PasswordRestorePage(),
-                                                ))),
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider(
+                                          create: (context) =>
+                                              PasswordRestoreBloc(),
+                                          child: PasswordRestorePage(),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(
-                                    height: 50,
-                                  )
+                                  const SizedBox(height: 50)
                                 ],
                               ),
                       ),
@@ -358,7 +359,8 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
     return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
   }
 
-  Future<GoogleSignInAccount?> signInWithGoogle(AuthPageProvider provider) async {
+  Future<GoogleSignInAccount?> signInWithGoogle(
+      AuthPageProvider provider) async {
     try {
       // Trigger the authentication flow
       await FirebaseAuth.instance.signOut();

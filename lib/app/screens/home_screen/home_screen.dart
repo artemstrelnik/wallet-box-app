@@ -848,7 +848,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
 
   Widget _fullSumCard({double balance = 0}) {
     final _balance = balance.toStringAsFixed(2);
-
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => context.read<HomeScreenBloc>().add(
@@ -1070,8 +1069,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
     BuildContext _context, {
     required Bill bill,
     bool isActive = false,
-  }) =>
-      Selector<UserNotifierProvider, bool>(
+  }) {
+    final _balance = (bill.balance).toStringAsFixed(2);
+     return Selector<UserNotifierProvider, bool>(
           builder: (context, isHiddenState, _) => bill.hidden &&
                   (!isHiddenState)
               ? SizedBox.shrink()
@@ -1281,19 +1281,15 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                               child: TextWidget(
                                 align: TextAlign.end,
                                 padding: 0,
-                                text: maskFormatter
-                                        .maskText((bill.balance)
+                                text: (maskFormatter
+                                        .maskText(_balance
                                             .toString()
-                                            .split("")
-                                            .reversed
-                                            .join(""))
+                                            .split(".")
+                                            .first
                                         .split("")
                                         .reversed
-                                        .join("") +
-                                    "," +
-                                    // ((bill.balance?.cents ?? 0) != null
-                                    //     ? " " + (bill.balance?.cents ?? 0).toString()
-                                    //     : " 00") +
+                                        .join("")).split("").reversed.join("")+
+                                    "," + _balance.toString().split(".").last)+
                                     " ₽",
                                 style: StyleTextCustom()
                                     .setStyleByEnum(
@@ -1311,7 +1307,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                     ),
                   ),
                 ),
-          selector: (_, provider) => provider.isHiddenBills);
+          selector: (_, provider) => provider.isHiddenBills);}
 
   Widget _schemeWidget(BuildContext _context) => ValueListenableBuilder(
         valueListenable: _schemeLoadingState,

@@ -266,7 +266,9 @@ class _AuthPhoneCodeState extends State<AuthPhoneCode> with ScreenLoader {
                                     ? ValueListenableBuilder(
                                         valueListenable: _lock,
                                         builder: (BuildContext context,
-                                                int _state, _) =>
+                                                int _state, _) {
+                                          Logger().i(_state.toString());
+                                          return
                                             Column(
                                           children: [
                                             _state != 0
@@ -301,7 +303,7 @@ class _AuthPhoneCodeState extends State<AuthPhoneCode> with ScreenLoader {
                                                   }),
                                             ),
                                           ],
-                                        ),
+                                        );},
                                       )
                                     : Container(),
                               ],

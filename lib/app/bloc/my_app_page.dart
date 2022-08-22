@@ -406,7 +406,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           child: ThemeProvider(
             initTheme: initTheme,
             builder: (_, myTheme) => DevicePreview(
-              enabled: !kReleaseMode,
+              enabled: false,
               builder: (context) => MaterialApp(
                 navigatorKey: _navigatorKey,
                 useInheritedMediaQuery: true,
