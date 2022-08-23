@@ -440,6 +440,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_staggered_animations",
+      "rootUri": "file:///C:/Users/User/AppData/Local/Pub/Cache/hosted/pub.dartlang.org/flutter_staggered_animations-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_svg",
       "rootUri": "file:///C:/Users/User/AppData/Local/Pub/Cache/hosted/pub.dartlang.org/flutter_svg-1.1.2",
       "packageUri": "lib/",
@@ -902,6 +908,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "simple_animations",
+      "rootUri": "file:///C:/Users/User/AppData/Local/Pub/Cache/hosted/pub.dartlang.org/simple_animations-5.0.0+2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "sky_engine",
       "rootUri": "file:///C:/src/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
@@ -1112,7 +1124,7 @@
       "languageVersion": "2.17"
     }
   ],
-  "generated": "2022-08-19T16:20:04.457919Z",
+  "generated": "2022-08-23T09:59:03.372010Z",
   "generator": "pub",
   "generatorVersion": "2.18.0-271.4.beta"
 }

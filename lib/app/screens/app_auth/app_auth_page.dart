@@ -233,7 +233,8 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                                         .setStyleByEnum(context,
                                             StyleColorEnum.appleButtonColors),
                                     border: true,
-                                    onTap: () => Navigator.push(
+                                    onTap: () =>
+                                        Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => BlocProvider(

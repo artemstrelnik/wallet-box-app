@@ -2,6 +2,7 @@ import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 
@@ -279,41 +280,74 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
                   );
                 case LoadingState.loaded:
                   return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _newCategory(formKey: _formKey),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Text(
-                                "Сортировать по",
-                                style: StyleTextCustom().setStyleByEnum(
-                                    context, StyleTextEnum.bodyCard),
+                    child: AnimationLimiter(
+                      child: Column(
+                        children: [
+                          AnimationConfiguration.staggeredList(
+                            position: 0,
+                            delay: Duration(milliseconds: 100),
+                            child: SlideAnimation(
+                              duration: Duration(milliseconds: 2500),
+                              curve: Curves.fastLinearToSlowEaseIn,
+                              horizontalOffset: 30.0,
+                              verticalOffset: 300.0,
+                              child: FlipAnimation(
+                                duration: Duration(milliseconds: 3000),
+                                curve: Curves.fastLinearToSlowEaseIn,
+                                flipAxis: FlipAxis.y,
+                                child: _newCategory(formKey: _formKey),
                               ),
                             ),
-                            IconButton(
-                                onPressed: () {
-                                  bottomSheetSort();
-                                },
-                                icon: Icon(CupertinoIcons.sort_down)),
-                          ],
-                        ),
-                        ValueListenableBuilder(
-                          valueListenable: _categoriesList,
-                          builder: (BuildContext context,
-                                  List<OperationCategory> _list, _) =>
-                              Column(
-                            children: _list.map((_item) {
-                              int idx = _list.indexOf(_item);
-                              return _singleCategory(
-                                  category: _item, index: idx);
-                            }).toList(),
                           ),
-                        ),
-                      ],
+                          AnimationConfiguration.staggeredList(
+                            position: 1,
+                            delay: Duration(milliseconds: 200),
+                            child: SlideAnimation(
+                              duration: Duration(milliseconds: 2700),
+                              curve: Curves.fastLinearToSlowEaseIn,
+                              horizontalOffset: 30.0,
+                              verticalOffset: 300.0,
+                              child: FlipAnimation(
+                                duration: Duration(milliseconds: 3200),
+                                curve: Curves.fastLinearToSlowEaseIn,
+                                flipAxis: FlipAxis.y,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10.0),
+                                      child: Text(
+                                        "Сортировать по",
+                                        style: StyleTextCustom().setStyleByEnum(
+                                            context, StyleTextEnum.bodyCard),
+                                      ),
+                                    ),
+                                    IconButton(
+                                        onPressed: () {
+                                          bottomSheetSort();
+                                        },
+                                        icon: Icon(CupertinoIcons.sort_down)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: _categoriesList,
+                            builder: (BuildContext context,
+                                    List<OperationCategory> _list, _) =>
+                                Column(
+                              children: _list.map((_item) {
+                                int idx = _list.indexOf(_item);
+                                return _singleCategory(
+                                    category: _item, index: idx);
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 default:
@@ -511,195 +545,214 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
       );
 
   Widget _singleCategory(
-          {required OperationCategory category, required int index}) =>
-      ValueListenableBuilder(
-        valueListenable: _activeIndexSort,
-        builder: (BuildContext context, int _index, _) => (_index == 1 &&
-                    category.forEarn) ||
-                (_index == 2 && category.forSpend) ||
-                (_index == 3 && category.favorite) ||
-                (_index == 0)
-            ? GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (context) =>
-                          CategoriesOpenBloc(category: category),
-                      child: const CategoriesOpen(),
+      {required OperationCategory category, required int index}) {
+    Logger().w(index.toString());
+    return AnimationConfiguration.staggeredList(
+      position: index + 2,
+      delay: Duration(milliseconds: 300),
+      child: SlideAnimation(
+        duration: Duration(milliseconds: 3000),
+        curve: Curves.fastLinearToSlowEaseIn,
+        horizontalOffset: 30.0,
+        verticalOffset: 300.0,
+        child: FlipAnimation(
+          duration: Duration(milliseconds: 3500),
+          curve: Curves.fastLinearToSlowEaseIn,
+          flipAxis: FlipAxis.y,
+          child: ValueListenableBuilder(
+            valueListenable: _activeIndexSort,
+            builder: (BuildContext context, int _index, _) => (_index == 1 &&
+                        category.forEarn) ||
+                    (_index == 2 && category.forSpend) ||
+                    (_index == 3 && category.favorite) ||
+                    (_index == 0)
+                ? GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (context) =>
+                              CategoriesOpenBloc(category: category),
+                          child: const CategoriesOpen(),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                child: ContainerCustom(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Container(
-                          height: 35,
-                          width: 35,
-                          decoration: BoxDecoration(
-                            color: Color(int.parse(
-                                "0xFF" + category.color.hex.substring(1))),
-                            borderRadius: BorderRadius.circular(5),
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(int.parse("0xFF" +
-                                        category.color.hex.substring(1)))
-                                    .withOpacity(.4),
-                                Color(int.parse(
+                    child: ContainerCustom(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Container(
+                              height: 35,
+                              width: 35,
+                              decoration: BoxDecoration(
+                                color: Color(int.parse(
                                     "0xFF" + category.color.hex.substring(1))),
+                                borderRadius: BorderRadius.circular(5),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Color(int.parse("0xFF" +
+                                            category.color.hex.substring(1)))
+                                        .withOpacity(.4),
+                                    Color(int.parse("0xFF" +
+                                        category.color.hex.substring(1))),
+                                  ],
+                                ),
+                              ),
+                              child: category.icon?.name != null
+                                  ? Center(
+                                      child: svgIcon(
+                                        baseUrl +
+                                            "api/v1/image/content/" +
+                                            category.icon!.name,
+                                        context,
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextWidget(
+                                  padding: 0,
+                                  text: category.name,
+                                  style: StyleTextCustom().setStyleByEnum(
+                                      context, StyleTextEnum.bodyCard),
+                                  align: TextAlign.left,
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextWidget(
+                                      text: category.forSpend
+                                          ? "Средний расход: "
+                                          : "Средний доход: ",
+                                      style: GoogleFonts.montserrat(
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 12,
+                                        color: _brightness == Brightness.light
+                                            ? CustomColors.lightPrimaryText
+                                            : CustomColors.lightPrimaryText,
+                                      ),
+                                    ),
+                                    TextWidget(
+                                      text: category.forSpend
+                                          ? "${category.categorySpend}"
+                                          : "${category.categoryEarn}",
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: _brightness == Brightness.light
+                                            ? CustomColors.lightPrimaryText
+                                            : CustomColors.lightPrimaryText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          child: category.icon?.name != null
-                              ? Center(
-                                  child: svgIcon(
-                                    baseUrl +
-                                        "api/v1/image/content/" +
-                                        category.icon!.name,
-                                    context,
-                                  ),
-                                )
-                              : SizedBox(),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextWidget(
-                              padding: 0,
-                              text: category.name,
-                              style: StyleTextCustom().setStyleByEnum(
-                                  context, StyleTextEnum.bodyCard),
-                              align: TextAlign.left,
+                          PopupMenuButton(
+                            color: StyleColorCustom().setStyleByEnum(
+                              context,
+                              StyleColorEnum.secondaryBackground,
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextWidget(
-                                  text: category.forSpend
-                                      ? "Средний расход: "
-                                      : "Средний доход: ",
-                                  style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 12,
-                                    color: _brightness == Brightness.light
-                                        ? CustomColors.lightPrimaryText
-                                        : CustomColors.lightPrimaryText,
-                                  ),
-                                ),
-                                TextWidget(
-                                  text: category.forSpend
-                                      ? "${category.categorySpend}"
-                                      : "${category.categoryEarn}",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: _brightness == Brightness.light
-                                        ? CustomColors.lightPrimaryText
-                                        : CustomColors.lightPrimaryText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuButton(
-                        color: StyleColorCustom().setStyleByEnum(
-                          context,
-                          StyleColorEnum.secondaryBackground,
-                        ),
-                        itemBuilder: (context) {
-                          var list = <PopupMenuEntry<Object>>[];
-                          list.add(
-                            PopupMenuItem(
-                              child: Row(children: [
-                                Icon(Icons.delete),
-                                Text(
-                                  "Удалить",
-                                  style: StyleTextCustom().setStyleByEnum(
-                                      context, StyleTextEnum.bodyCard),
-                                )
-                              ]),
-                              value: 1,
-                              onTap: () =>
-                                  context.read<CategoriesScreensBloc>().add(
+                            itemBuilder: (context) {
+                              var list = <PopupMenuEntry<Object>>[];
+                              list.add(
+                                PopupMenuItem(
+                                  child: Row(children: [
+                                    Icon(Icons.delete),
+                                    Text(
+                                      "Удалить",
+                                      style: StyleTextCustom().setStyleByEnum(
+                                          context, StyleTextEnum.bodyCard),
+                                    )
+                                  ]),
+                                  value: 1,
+                                  onTap: () => context
+                                      .read<CategoriesScreensBloc>()
+                                      .add(
                                         RemoveCategoryEvent(category: category),
                                       ),
-                            ),
-                          );
-                          list.add(
-                            PopupMenuItem(
-                              child: Row(children: [
-                                Icon(
-                                  Icons.edit,
                                 ),
-                                Text(
-                                  "Редактировать",
-                                  style: StyleTextCustom().setStyleByEnum(
-                                      context, StyleTextEnum.bodyCard),
-                                )
-                              ]),
-                              value: 2,
-                              onTap: () => context
-                                  .read<CategoriesScreensBloc>()
-                                  .add(CategoryEditEvent(category: category)),
-                            ),
-                          );
-                          list.add(
-                            PopupMenuItem(
-                              child: Row(children: [
-                                !category.favorite
-                                    ? Icon(
-                                        Icons.favorite_border,
-                                      )
-                                    : Icon(
-                                        Icons.favorite,
-                                        color: Colors.red,
+                              );
+                              list.add(
+                                PopupMenuItem(
+                                  child: Row(children: [
+                                    Icon(
+                                      Icons.edit,
+                                    ),
+                                    Text(
+                                      "Редактировать",
+                                      style: StyleTextCustom().setStyleByEnum(
+                                          context, StyleTextEnum.bodyCard),
+                                    )
+                                  ]),
+                                  value: 2,
+                                  onTap: () => context
+                                      .read<CategoriesScreensBloc>()
+                                      .add(CategoryEditEvent(
+                                          category: category)),
+                                ),
+                              );
+                              list.add(
+                                PopupMenuItem(
+                                  child: Row(children: [
+                                    !category.favorite
+                                        ? Icon(
+                                            Icons.favorite_border,
+                                          )
+                                        : Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          ),
+                                    Text(
+                                      category.favorite
+                                          ? "Удалить из избранных"
+                                          : "Добавить в избранное",
+                                      style: StyleTextCustom().setStyleByEnum(
+                                          context, StyleTextEnum.bodyCard),
+                                    )
+                                  ]),
+                                  value: 1,
+                                  onTap: () {
+                                    final _bloc =
+                                        context.read<CategoriesScreensBloc>();
+                                    _bloc.add(
+                                      UpdateFavoriteCategoryEvent(
+                                        category: category,
                                       ),
-                                Text(
-                                  category.favorite
-                                      ? "Удалить из избранных"
-                                      : "Добавить в избранное",
-                                  style: StyleTextCustom().setStyleByEnum(
-                                      context, StyleTextEnum.bodyCard),
-                                )
-                              ]),
-                              value: 1,
-                              onTap: () {
-                                final _bloc =
-                                    context.read<CategoriesScreensBloc>();
-                                _bloc.add(
-                                  UpdateFavoriteCategoryEvent(
-                                    category: category,
-                                  ),
-                                );
-                              },
+                                    );
+                                  },
+                                ),
+                              );
+                              return list;
+                            },
+                            icon: Icon(
+                              Icons.more_vert,
+                              size: 24,
+                              color: _brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
                             ),
-                          );
-                          return list;
-                        },
-                        icon: Icon(
-                          Icons.more_vert,
-                          size: 24,
-                          color: _brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              )
-            : SizedBox.shrink(),
-      );
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _mySelectedIcon() => ValueListenableBuilder(
         valueListenable: _colorIsLoaded,

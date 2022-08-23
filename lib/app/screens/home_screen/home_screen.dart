@@ -23,6 +23,8 @@ import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/constants/string_extension.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
+import 'package:wallet_box/app/core/generals_widgets/down_to_up_animation.dart';
+import 'package:wallet_box/app/core/generals_widgets/right_to_left_animation.dart';
 import 'package:wallet_box/app/core/generals_widgets/scaffold_app_bar.dart';
 import 'package:wallet_box/app/core/generals_widgets/text.dart';
 import 'package:wallet_box/app/core/styles/style_color_custom.dart';
@@ -179,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           _transactionList.value = state.transaction;
         }
         if (state is UpdateUserState) {
-          Logger().i("message");
           _userProvider.setUser = state.user;
         }
         if (state is UpdateBillList) {
@@ -275,12 +276,12 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       child: Column(
                         children: [
                           _billsListWidget(),
-                          _billAndCircleMiddleBody(),
-                          _schemeWidget(context),
+                          DownToUp(delay: 2, child: _billAndCircleMiddleBody()),
+                          DownToUp(delay: 2.5, child: _schemeWidget(context)),
                         ],
                       ),
                     ),
-                    _transactionListWidget(),
+                    DownToUp(delay: 3, child: _transactionListWidget()),
                   ],
                 ),
                 Padding(
@@ -1038,11 +1039,17 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                 case LoadingState.loaded:
                   _child = Row(
                     children: [
-                      _fullSumCard(balance: _price),
-                      ..._items!
-                          .map((e) => _singleBillCard(context,
-                              bill: e, isActive: _selectedBillValue == e.id))
-                          .toList(),
+                      RightToLeft(
+                        delay: 0.5,
+                        child: _fullSumCard(balance: _price),
+                      ),
+                      for (int i = 0; i < _items!.length; i++)
+                        _singleBillCard(
+                          context,
+                          index: i,
+                          bill: _items[i],
+                          isActive: _selectedBillValue == _items[i].id,
+                        )
                     ],
                   );
                   break;
@@ -1067,11 +1074,14 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
 
   Widget _singleBillCard(
     BuildContext _context, {
+    required int index,
     required Bill bill,
     bool isActive = false,
   }) {
     final _balance = (bill.balance).toStringAsFixed(2);
-     return Selector<UserNotifierProvider, bool>(
+    return RightToLeft(
+      delay: index + 1,
+      child: Selector<UserNotifierProvider, bool>(
           builder: (context, isHiddenState, _) => bill.hidden &&
                   (!isHiddenState)
               ? SizedBox.shrink()
@@ -1282,14 +1292,18 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                 align: TextAlign.end,
                                 padding: 0,
                                 text: (maskFormatter
-                                        .maskText(_balance
-                                            .toString()
-                                            .split(".")
-                                            .first
-                                        .split("")
-                                        .reversed
-                                        .join("")).split("").reversed.join("")+
-                                    "," + _balance.toString().split(".").last)+
+                                            .maskText(_balance
+                                                .toString()
+                                                .split(".")
+                                                .first
+                                                .split("")
+                                                .reversed
+                                                .join(""))
+                                            .split("")
+                                            .reversed
+                                            .join("") +
+                                        "," +
+                                        _balance.toString().split(".").last) +
                                     " ₽",
                                 style: StyleTextCustom()
                                     .setStyleByEnum(
@@ -1307,7 +1321,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                     ),
                   ),
                 ),
-          selector: (_, provider) => provider.isHiddenBills);}
+          selector: (_, provider) => provider.isHiddenBills),
+    );
+  }
 
   Widget _schemeWidget(BuildContext _context) => ValueListenableBuilder(
         valueListenable: _schemeLoadingState,
@@ -1651,13 +1667,17 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       .setStyleByEnum(context, StyleTextEnum.titleCard),
                 ),
                 secondChild: Text(
-                  touchedIndex == -1 ? "": _categories.values.toList()[touchedIndex].name,
+                  touchedIndex == -1
+                      ? ""
+                      : _categories.values.toList()[touchedIndex].name,
                   style: StyleTextCustom()
                       .setStyleByEnum(context, StyleTextEnum.titleCard),
                 ),
                 duration: Duration(milliseconds: 500),
                 reverseDuration: Duration(seconds: 500),
-                crossFadeState: touchedIndex == -1 ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                crossFadeState: touchedIndex == -1
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
               ),
             ],
           ),

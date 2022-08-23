@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 
@@ -16,6 +17,7 @@ import 'package:wallet_box/app/bloc/my_app_bloc.dart';
 import 'package:wallet_box/app/bloc/my_app_page.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
+import 'package:wallet_box/app/core/generals_widgets/animation_list.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';
 import 'package:wallet_box/app/core/generals_widgets/dialog.dart';
 import 'package:wallet_box/app/core/generals_widgets/scaffold_app_bar.dart';
@@ -418,103 +420,109 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
   Widget _listSettings() {
     return Form(
       key: _formKey,
-      child: ListView(
-        physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics()),
-        children: [
-          _subscriptionWidget(),
-          _phoneEditWidget(),
-          _emailEditWidget(),
-          _logInGoogleWidget(),
-          _notificationsWidget(),
-          _themeWidget(),
-          ValueListenableBuilder(
-            valueListenable: _pinCodeNotifier,
-            builder: (BuildContext context, bool _pinCodeState, _) =>
-                ContainerCustom(
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0, top: 2.0),
-                    child: Icon(
-                      Icons.lock_outline,
-                      color: StyleColorCustom()
-                          .setStyleByEnum(context, StyleColorEnum.colorIcon),
+      child: AnimationLimiter(
+        child: ListView(
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          children: [
+            CustomAnimationList(position: 0, child: _subscriptionWidget()),
+            CustomAnimationList(position: 1, child: _phoneEditWidget()),
+            CustomAnimationList(position: 2, child: _emailEditWidget()),
+            CustomAnimationList(position: 3, child: _logInGoogleWidget()),
+            CustomAnimationList(position: 4, child: _notificationsWidget()),
+            CustomAnimationList(position: 5, child: _themeWidget()),
+            CustomAnimationList(
+                position: 6,
+                child: ValueListenableBuilder(
+                  valueListenable: _pinCodeNotifier,
+                  builder: (BuildContext context, bool _pinCodeState, _) =>
+                      ContainerCustom(
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0, top: 2.0),
+                          child: Icon(
+                            Icons.lock_outline,
+                            color: StyleColorCustom().setStyleByEnum(
+                                context, StyleColorEnum.colorIcon),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextWidget(
+                              padding: 0,
+                              text: textString_35,
+                              style: StyleTextCustom().setStyleByEnum(
+                                  context, StyleTextEnum.bodyCard)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: CupertinoSwitch(
+                            activeColor: CustomColors.pink,
+                            trackColor: StyleColorCustom().setStyleByEnum(
+                                context,
+                                StyleColorEnum.cupertinoSwitchTrackColor),
+                            thumbColor: StyleColorCustom().setStyleByEnum(
+                                context,
+                                StyleColorEnum.cupertinoSwitchThumbColor),
+                            value: _pinCodeState,
+                            onChanged: (bool value) {
+                              _pinCodeNotifier.value = value;
+                              if (value) {
+                                context.read<SettingScreenBloc>().add(
+                                      UserUpdatePinCodeEvent(),
+                                    );
+                              } else {
+                                context.read<SettingScreenBloc>().add(
+                                      UserRemovePinCodeEvent(),
+                                    );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Expanded(
-                    child: TextWidget(
-                        padding: 0,
-                        text: textString_35,
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: CupertinoSwitch(
-                      activeColor: CustomColors.pink,
-                      trackColor: StyleColorCustom().setStyleByEnum(
-                          context, StyleColorEnum.cupertinoSwitchTrackColor),
-                      thumbColor: StyleColorCustom().setStyleByEnum(
-                          context, StyleColorEnum.cupertinoSwitchThumbColor),
-                      value: _pinCodeState,
-                      onChanged: (bool value) {
-                        _pinCodeNotifier.value = value;
-                        if (value) {
-                          context.read<SettingScreenBloc>().add(
-                                UserUpdatePinCodeEvent(),
-                              );
-                        } else {
-                          context.read<SettingScreenBloc>().add(
-                                UserRemovePinCodeEvent(),
-                              );
-                        }
-                      },
+                )),
+            CustomAnimationList(position: 7, child: _touchWidget()),
+            CustomAnimationList(position: 8, child: _currencyWidget()),
+            CustomAnimationList(
+                position: 9,
+                child: GestureDetector(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                                create: (context) => ExportBloc(),
+                                child: ExportScreen(),
+                              ))),
+                  child: ContainerCustom(
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0, top: 2.0),
+                          child: Icon(
+                            Icons.arrow_circle_down_outlined,
+                            color: StyleColorCustom().setStyleByEnum(
+                                context, StyleColorEnum.colorIcon),
+                          ),
+                        ),
+                        Expanded(
+                          child: TextWidget(
+                              padding: 0,
+                              text: textString_39,
+                              style: StyleTextCustom().setStyleByEnum(
+                                  context, StyleTextEnum.bodyCard)),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          _touchWidget(),
-          _currencyWidget(),
-          GestureDetector(
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                          create: (context) => ExportBloc(),
-                          child: ExportScreen(),
-                        ))),
-            child: ContainerCustom(
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0, top: 2.0),
-                    child: Icon(
-                      Icons.arrow_circle_down_outlined,
-                      color: StyleColorCustom()
-                          .setStyleByEnum(context, StyleColorEnum.colorIcon),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextWidget(
-                        padding: 0,
-                        text: textString_39,
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _clearWidget(),
-          _removeUser(),
-          _logout(),
-          SizedBox(
-            height: 10,
-          )
-        ],
+                )),
+            CustomAnimationList(position: 10, child: _clearWidget()),
+            CustomAnimationList(position: 11, child: _removeUser()),
+            CustomAnimationList(position: 12, child: _logout()),
+            SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

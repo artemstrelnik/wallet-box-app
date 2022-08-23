@@ -20,6 +20,9 @@ dependencies:
   fl_chart: ^0.55.1
   percent_indicator: 4.2.2
 
+  simple_animations: ^5.0.0+2
+  flutter_staggered_animations: ^1.0.0
+
   http: ^0.13.5
   bloc: ^8.0.3
   flutter_bloc: ^8.0.1

@@ -410,6 +410,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           _listBills.addAll(_responseListBills);
         }
 
+
         emit(UpdateBillList(bills: _listBills));
 
         List<Transaction> _allListTransactions = <Transaction>[];
@@ -437,7 +438,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           _listTransactions.addAll(_requestBillTransactions.page);
           _allListTransactions.addAll(_allBillTransactions.page);
         }
-
         emit(UpdateSchemeState(
           start: _start,
           end: _end,
@@ -448,7 +448,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         // Logger().i(_listTransactions[0].);
         emit(UpdateTransactionList(transaction: _allListTransactions));
       }
-
       emit(const ListLoadingOpacityHideState());
       // ignore: nullable_type_in_catch_clause
     } on dynamic catch (_) {
@@ -526,7 +525,7 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
           _end,
           event.isExpense,
         );
-        if ( _requestBillTransactions != null) {
+        if (_requestBillTransactions != null) {
           _listTransactions.addAll(_requestBillTransactions.page);
           // _allListTransactions.addAll(_allBillTransactions.page);
         }
