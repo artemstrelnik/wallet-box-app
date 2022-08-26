@@ -28,6 +28,8 @@ import 'package:wallet_box/app/screens/password_restore/password_restore_bloc.da
 import 'package:wallet_box/app/screens/password_restore/password_restore_page.dart';
 
 import '../../core/generals_widgets/up_to_down_animation.dart';
+import '../auth_screens/bloc_phone/auth_bloc.dart';
+import '../auth_screens/bloc_phone/auth_phone.dart';
 import 'app_auth_bloc.dart';
 import 'app_auth_events.dart';
 import 'app_auth_states.dart';
@@ -246,26 +248,26 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                                               StyleColorEnum.appleButtonColors),
                                       border: true,
                                       onTap: () =>
-                                          Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => BlocProvider(
-                                            create: (context) =>
-                                                HomeScreenBloc(),
-                                            child: const HomeScreen(),
-                                          ),
-                                        ),
-                                        (route) => false,
-                                      ),
-                                      //     Navigator.push(
+                                      //     Navigator.pushAndRemoveUntil(
                                       //   context,
                                       //   MaterialPageRoute(
                                       //     builder: (_) => BlocProvider(
-                                      //       create: (context) => AuthBloc(),
-                                      //       child: const AuthPhone(),
+                                      //       create: (context) =>
+                                      //           HomeScreenBloc(),
+                                      //       child: const HomeScreen(),
                                       //     ),
                                       //   ),
+                                      //   (route) => false,
                                       // ),
+                                          Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider(
+                                            create: (context) => AuthBloc(),
+                                            child: const AuthPhone(),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   DownToUp(
