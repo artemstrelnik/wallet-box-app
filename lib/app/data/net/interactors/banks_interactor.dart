@@ -72,7 +72,7 @@ class BanksInteractor {
         url: _t,
         body: body,
       );
-      final data = json.decode(response.body);
+      // final data = json.decode(response.body);
       if (response.statusCode == 200) {
         return true;
       }
@@ -147,7 +147,7 @@ class BanksInteractor {
         url: _t,
         queryParameters: {},
       );
-      final data = json.decode(response.body);
+      // final data = json.decode(response.body);
       if (response.statusCode == 200) {
         return true;
       }

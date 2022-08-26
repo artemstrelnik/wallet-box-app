@@ -2,7 +2,6 @@ import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 
-import '../../data/net/models/permission_role_provider.dart';
 import '../../data/net/models/user_auth_model.dart';
 
 abstract class HomeScreenState {

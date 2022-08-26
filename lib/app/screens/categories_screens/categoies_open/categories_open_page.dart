@@ -399,46 +399,84 @@ class _CategoriesOpenState extends State<CategoriesOpen> with ScreenLoader {
 
   ContainerCustom _headerDate() {
     return ContainerCustom(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_category.value != null && _category.value!.forSpend)
-                  Row(
-                    children: [
-                      TextWidget(
-                        padding: 0,
-                        text: "Средний расход: ",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
-                      ),
-                      TextWidget(
-                        padding: 0,
-                        text: "${_category.value!.categorySpend}",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.titleCard),
-                      ),
-                    ],
-                  ),
-                if (_category.value != null && _category.value!.forEarn)
-                  Row(
-                    children: [
-                      TextWidget(
-                        padding: 0,
-                        text: "Средний доход: ",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
-                      ),
-                      TextWidget(
-                        padding: 0,
-                        text: "${_category.value!.categoryEarn}",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.titleCard),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          );
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _category.value != null &&
+                  _category.value!.forSpend &&
+                  _category.value!.forEarn
+              ? Column(
+                  children: [
+                    Row(
+                      children: [
+                        TextWidget(
+                          padding: 0,
+                          text: "Средний расход: ",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                        ),
+                        TextWidget(
+                          padding: 0,
+                          text: "${_category.value!.categorySpend}",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.titleCard),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        TextWidget(
+                          padding: 0,
+                          text: "Средний доход: ",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                        ),
+                        TextWidget(
+                          padding: 0,
+                          text: "${_category.value!.categoryEarn}",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.titleCard),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : (_category.value != null && _category.value!.forSpend)
+                  ? Row(
+                      children: [
+                        TextWidget(
+                          padding: 0,
+                          text: "Средний расход: ",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                        ),
+                        TextWidget(
+                          padding: 0,
+                          text: "${_category.value!.categorySpend}",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.titleCard),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        TextWidget(
+                          padding: 0,
+                          text: "Средний доход: ",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.bodyCard),
+                        ),
+                        TextWidget(
+                          padding: 0,
+                          text: "${_category.value!.categoryEarn}",
+                          style: StyleTextCustom()
+                              .setStyleByEnum(context, StyleTextEnum.titleCard),
+                        ),
+                      ],
+                    ),
+        ],
+      ),
+    );
   }
 
   _textWidget({

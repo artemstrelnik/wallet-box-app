@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/enum.dart';
@@ -7,7 +6,6 @@ import 'package:wallet_box/app/data/net/interactors/banks_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/bill_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/transaction_interactor.dart';
 import 'package:wallet_box/app/data/net/models/bills_response.dart';
-import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 
@@ -26,7 +24,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     on<UpdateRangeDatesEvent>(_updateRangeDates);
     on<RemoveTransaction>(_removeTransactionByIdRequest);
     on<UpdateSchemeTypeEvent>(_updateSchemeType);
-    on<UpdateSpendEarnEvent>(_updateSpendEarn);
     on<UpdateBillHiddenEvent>(_onUpdateBillHidden);
   }
 
@@ -540,34 +537,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         // emit(UpdateTransactionList(transaction: _allListTransactions));
       }
 
-      emit(const ListLoadingOpacityHideState());
-    } on dynamic catch (_) {
-      rethrow;
-    }
-  }
-
-  Future<void> _updateSpendEarn(
-    UpdateSpendEarnEvent event,
-    Emitter<HomeScreenState> emit,
-  ) async {
-    try {
-      emit(const ListLoadingOpacityState());
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString("wallet_box_token");
-      String? uid = prefs.getString("wallet_box_uid");
-      if (token != null && uid != null) {
-        Map<String, dynamic> body = <String, dynamic>{
-          if (event.plannedSpend != null) "plannedSpend": event.plannedSpend,
-          if (event.plannedEarn != null) "plannedEarn": event.plannedEarn,
-        };
-        final User? response = await TransactionInteractor().updateEarnSpend(
-          body: body,
-          token: token,
-        );
-        if (response != null) {
-          emit(UpdateUserState(user: response));
-        }
-      }
       emit(const ListLoadingOpacityHideState());
     } on dynamic catch (_) {
       rethrow;

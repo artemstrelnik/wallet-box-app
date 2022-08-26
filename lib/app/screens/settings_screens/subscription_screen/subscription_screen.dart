@@ -265,21 +265,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     text: _price(item.variants.first),
                   ),
                   TextSpan(
-                    text: item.variants.first.price != null &&
-                            item.variants.first.price != 0
+                    text: item.variants.first.price != 0
                         ? " "
                         : "",
                   ),
                   TextSpan(
-                    text: item.variants.first.price != null &&
-                            item.variants.first.price != 0
+                    text: item.variants.first.price != 0
                         ? item.variants.first.price.round().toString()
                         : "",
                     style: StyleTextCustom()
                         .setStyleByEnum(context, StyleTextEnum.textButtonCancel)
                         .copyWith(
-                          color: item.variants.first.price != null &&
-                                  item.variants.first.price != 0
+                          color: item.variants.first.price != 0
                               ? CustomColors.darkButtonBackground
                               : CustomColors.lightSecondaryText,
                           decoration: TextDecoration.lineThrough,
@@ -292,8 +289,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           .setStyleByEnum(
                               context, StyleTextEnum.textButtonCancel)
                           .copyWith(
-                            color: item.variants.first.price != null &&
-                                    item.variants.first.price != 0
+                            color: item.variants.first.price != 0
                                 ? CustomColors.pink
                                 : CustomColors.lightSecondaryText,
                           )),

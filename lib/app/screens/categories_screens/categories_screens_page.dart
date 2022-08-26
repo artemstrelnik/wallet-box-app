@@ -285,14 +285,14 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
                         children: [
                           AnimationConfiguration.staggeredList(
                             position: 0,
-                            delay: Duration(milliseconds: 100),
+                            delay: Duration(milliseconds: 0),
                             child: SlideAnimation(
-                              duration: Duration(milliseconds: 2500),
+                              duration: Duration(milliseconds: 0),
                               curve: Curves.fastLinearToSlowEaseIn,
                               horizontalOffset: 30.0,
                               verticalOffset: 300.0,
                               child: FlipAnimation(
-                                duration: Duration(milliseconds: 3000),
+                                duration: Duration(milliseconds: 0),
                                 curve: Curves.fastLinearToSlowEaseIn,
                                 flipAxis: FlipAxis.y,
                                 child: _newCategory(formKey: _formKey),
@@ -549,14 +549,14 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
     Logger().w(index.toString());
     return AnimationConfiguration.staggeredList(
       position: index + 2,
-      delay: Duration(milliseconds: 300),
+      delay: Duration(milliseconds: 150),
       child: SlideAnimation(
-        duration: Duration(milliseconds: 3000),
+        duration: Duration(milliseconds: 2500),
         curve: Curves.fastLinearToSlowEaseIn,
         horizontalOffset: 30.0,
         verticalOffset: 300.0,
         child: FlipAnimation(
-          duration: Duration(milliseconds: 3500),
+          duration: Duration(milliseconds: 2700),
           curve: Curves.fastLinearToSlowEaseIn,
           flipAxis: FlipAxis.y,
           child: ValueListenableBuilder(
@@ -588,8 +588,11 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
                               height: 35,
                               width: 35,
                               decoration: BoxDecoration(
-                                color: Color(int.parse(
-                                    "0xFF" + category.color.hex.substring(1))),
+                                color: Color(
+                                  int.parse(
+                                    "0xFF" + category.color.hex.substring(1),
+                                  ),
+                                ),
                                 borderRadius: BorderRadius.circular(5),
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
@@ -630,7 +633,7 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     TextWidget(
-                                      text: category.forSpend
+                                      text: category.forEarn && category.forSpend ? "Средний расход: \nСредний доход: " : category.forSpend
                                           ? "Средний расход: "
                                           : "Средний доход: ",
                                       style: GoogleFonts.montserrat(
@@ -642,7 +645,7 @@ class _CategoriseScreensPageState extends State<CategoriseScreensPage>
                                       ),
                                     ),
                                     TextWidget(
-                                      text: category.forSpend
+                                      text:category.forEarn && category.forSpend ? "${category.categorySpend}\n${category.categoryEarn}" : category.forSpend
                                           ? "${category.categorySpend}"
                                           : "${category.categoryEarn}",
                                       style: GoogleFonts.montserrat(

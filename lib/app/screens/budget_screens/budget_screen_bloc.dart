@@ -12,6 +12,7 @@ import 'budget_screen_states.dart';
 class BudgetScreenBloc extends Bloc<BudgetScreenEvent, BudgetScreenState> {
   BudgetScreenBloc() : super(const ListLoadingState()) {
     on<PageOpenedEvent>(_onOpenScreen);
+    on<UpdateSpendEarnEvent>(_updateSpendEarn);
   }
 
   late User _user;
@@ -169,4 +170,33 @@ class BudgetScreenBloc extends Bloc<BudgetScreenEvent, BudgetScreenState> {
       body: body,
     );
   }
+
+  Future<void> _updateSpendEarn(
+      UpdateSpendEarnEvent event,
+      Emitter<BudgetScreenState> emit,
+      ) async {
+    try {
+      emit(const ListLoadingOpacityState());
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("wallet_box_token");
+      String? uid = prefs.getString("wallet_box_uid");
+      if (token != null && uid != null) {
+        Map<String, dynamic> body = <String, dynamic>{
+          if (event.plannedSpend != null) "plannedSpend": event.plannedSpend,
+          if (event.plannedEarn != null) "plannedEarn": event.plannedEarn,
+        };
+        final User? response = await TransactionInteractor().updateEarnSpend(
+          body: body,
+          token: token,
+        );
+        if (response != null) {
+          emit(UpdateUserState(user: response));
+        }
+      }
+      emit(const ListLoadingOpacityHideState());
+    } on dynamic catch (_) {
+      rethrow;
+    }
+  }
+
 }

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';
 import 'package:wallet_box/app/core/generals_widgets/container.dart';

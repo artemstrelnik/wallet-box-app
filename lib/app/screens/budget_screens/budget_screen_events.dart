@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 abstract class BudgetScreenEvent extends Equatable {
   const BudgetScreenEvent();
+
+  List<Object> get props => [];
 }
 
 class PageOpenedEvent extends BudgetScreenEvent {
@@ -9,6 +11,11 @@ class PageOpenedEvent extends BudgetScreenEvent {
 
   final bool? next;
   final bool? prev;
-  @override
-  List<Object> get props => [];
+}
+
+class UpdateSpendEarnEvent extends BudgetScreenEvent {
+  final int? plannedSpend;
+  final int? plannedEarn;
+
+  UpdateSpendEarnEvent({this.plannedSpend, this.plannedEarn});
 }

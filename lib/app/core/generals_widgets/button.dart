@@ -24,8 +24,7 @@ class ButtonBlue extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           textStyle: StyleTextCustom()
-              .setStyleByEnum(context, StyleTextEnum.textButton),
-          primary: CustomColors.blue,
+              .setStyleByEnum(context, StyleTextEnum.textButton), backgroundColor: CustomColors.blue,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
           ),
@@ -68,8 +67,7 @@ class ButtonPink extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           textStyle: StyleTextCustom()
-              .setStyleByEnum(context, StyleTextEnum.textButton),
-          primary: CustomColors.pink,
+              .setStyleByEnum(context, StyleTextEnum.textButton), backgroundColor: CustomColors.pink,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
           ),
@@ -111,8 +109,7 @@ class ButtonCancel extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           textStyle: StyleTextCustom()
-              .setStyleByEnum(context, StyleTextEnum.textButtonCancel),
-          primary: StyleColorCustom()
+              .setStyleByEnum(context, StyleTextEnum.textButtonCancel), backgroundColor: StyleColorCustom()
               .setStyleByEnum(context, StyleColorEnum.buttonCancel),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
@@ -152,10 +149,9 @@ class ButtonNoBackground extends StatelessWidget {
       padding: EdgeInsets.only(top: padding == null ? 20.0 : padding!),
       child: TextButton(
         style: TextButton.styleFrom(
-          textStyle: StyleTextCustom()
+          foregroundColor: StyleColorCustom()
+              .setStyleByEnum(context, StyleColorEnum.buttonCancel), textStyle: StyleTextCustom()
               .setStyleByEnum(context, StyleTextEnum.textButtonNoBackground),
-          primary: StyleColorCustom()
-              .setStyleByEnum(context, StyleColorEnum.buttonCancel),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
           ),
@@ -195,8 +191,7 @@ class ButtonWhite extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           textStyle: StyleTextCustom()
-              .setStyleByEnum(context, StyleTextEnum.textButtonCancel),
-          primary: CustomColors.lightSecondaryBackground,
+              .setStyleByEnum(context, StyleTextEnum.textButtonCancel), backgroundColor: CustomColors.lightSecondaryBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
           ),

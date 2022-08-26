@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:random_password_generator/random_password_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/api.dart';

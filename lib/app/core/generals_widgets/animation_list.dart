@@ -15,14 +15,14 @@ class CustomAnimationList extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimationConfiguration.staggeredList(
       position: position,
-      delay: Duration(milliseconds: position == 0 ? 100 : 300),
+      delay: Duration(milliseconds: position == 0 ? 100 : 150),
       child: SlideAnimation(
-        duration: Duration(milliseconds: position == 0 ? 2500:  3000),
+        duration: Duration(milliseconds: position == 0 ? 2000:  2500),
         curve: Curves.fastLinearToSlowEaseIn,
         horizontalOffset: 30.0,
         verticalOffset: 300.0,
         child: FlipAnimation(
-          duration: Duration(milliseconds: position == 0 ? 3000: 3500),
+          duration: Duration(milliseconds: position == 0 ? 2200: 2500),
           curve: Curves.fastLinearToSlowEaseIn,
           flipAxis: FlipAxis.y,
           child: child,

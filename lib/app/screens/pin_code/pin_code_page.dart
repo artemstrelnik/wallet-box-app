@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/bloc/my_app_bloc.dart';
 import 'package:wallet_box/app/bloc/my_app_events.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';

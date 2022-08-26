@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
-
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:app_links/app_links.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -210,7 +208,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               UserAuthenticatedEvent(),
             );
       }
-    } on PlatformException catch (e) {
+    } on PlatformException {
       return;
     }
     if (!mounted) {
@@ -447,6 +445,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           );
                     }
                   }
+                  return null;
                 },
                 initialRoute: "/",
                 routes: {},

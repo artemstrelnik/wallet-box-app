@@ -6,30 +6,28 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 import 'package:wallet_box/app/core/generals_widgets/dialog.dart';
+import 'package:wallet_box/app/core/generals_widgets/down_to_up_animation.dart';
 import 'package:wallet_box/app/core/styles/style_color_custom.dart';
 import 'package:wallet_box/app/core/styles/style_text_custom.dart';
 import 'package:wallet_box/app/core/themes/colors.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
-import 'package:wallet_box/app/screens/auth_screens/bloc_phone/auth_bloc.dart';
-import 'package:wallet_box/app/screens/auth_screens/bloc_phone/auth_phone.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen.dart';
 import 'package:wallet_box/app/screens/home_screen/home_screen_bloc.dart';
 import 'package:wallet_box/app/screens/password_restore/password_restore_bloc.dart';
 import 'package:wallet_box/app/screens/password_restore/password_restore_page.dart';
 
+import '../../core/generals_widgets/up_to_down_animation.dart';
 import 'app_auth_bloc.dart';
 import 'app_auth_events.dart';
 import 'app_auth_states.dart';
@@ -152,12 +150,15 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(80.0),
-                        child: Center(
-                          child: ConstContext.lightMode(context)
-                              ? Image.asset(logoLight)
-                              : Image.asset(logoDark),
+                      UpToDown(
+                        delay: Platform.isIOS ? 1 : 1.2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(80.0),
+                          child: Center(
+                            child: ConstContext.lightMode(context)
+                                ? Image.asset(logoLight)
+                                : Image.asset(logoDark),
+                          ),
                         ),
                       ),
                       Expanded(child: Container()),
@@ -167,99 +168,125 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
                             : Column(
                                 children: [
                                   (Platform.isIOS)
-                                      ? _customButton(
-                                          "Войти через Apple",
-                                          icon: SvgPicture.asset(
-                                              AssetsPath.apple),
-                                          textStyle: StyleTextCustom()
-                                              .setStyleByEnum(
-                                                  context,
-                                                  StyleTextEnum
-                                                      .appleButtonStyleReverse),
-                                          backgroundColor: StyleColorCustom()
-                                              .setStyleByEnum(
-                                                  context,
-                                                  StyleColorEnum
-                                                      .appleButtonColors),
-                                          onTap: () async {
-                                            context
-                                                .read<AuthPageProvider>()
-                                                .updateLoading(true);
-                                            final UserCredential _userInfo =
-                                                await signInWithApple();
-                                            context.read<AppAuthBloc>().add(
-                                                  CheckUserEvent(
-                                                    appleUser: _userInfo,
-                                                    type: UserType.APPLE,
-                                                  ),
-                                                );
-                                          },
+                                      ? DownToUp(
+                                          delay: 1,
+                                          child: _customButton(
+                                            "Войти через Apple",
+                                            icon: SvgPicture.asset(
+                                                AssetsPath.apple),
+                                            textStyle: StyleTextCustom()
+                                                .setStyleByEnum(
+                                                    context,
+                                                    StyleTextEnum
+                                                        .appleButtonStyleReverse),
+                                            backgroundColor: StyleColorCustom()
+                                                .setStyleByEnum(
+                                                    context,
+                                                    StyleColorEnum
+                                                        .appleButtonColors),
+                                            onTap: () async {
+                                              context
+                                                  .read<AuthPageProvider>()
+                                                  .updateLoading(true);
+                                              final UserCredential _userInfo =
+                                                  await signInWithApple();
+                                              context.read<AppAuthBloc>().add(
+                                                    CheckUserEvent(
+                                                      appleUser: _userInfo,
+                                                      type: UserType.APPLE,
+                                                    ),
+                                                  );
+                                            },
+                                          ),
                                         )
                                       : SizedBox(),
-                                  _customButton(
-                                    "Войти через Google",
-                                    icon: SvgPicture.asset(AssetsPath.google),
-                                    textStyle: StyleTextCustom()
-                                        .setStyleByEnum(context,
-                                            StyleTextEnum.appleButtonStyle)
-                                        .copyWith(
-                                            color:
-                                                CustomColors.lightPrimaryText),
-                                    backgroundColor: CustomColors.googleButton,
-                                    onTap: () async {
-                                      final provider =
-                                          context.read<AuthPageProvider>();
-                                      provider.updateLoading(true);
-                                      context.read<AppAuthBloc>().add(PageOpenedEvent());
-                                      final GoogleSignInAccount? _userInfo =
-                                          await signInWithGoogle(provider);
+                                  DownToUp(
+                                    delay: 1.5,
+                                    child: _customButton(
+                                      "Войти через Google",
+                                      icon: SvgPicture.asset(AssetsPath.google),
+                                      textStyle: StyleTextCustom()
+                                          .setStyleByEnum(context,
+                                              StyleTextEnum.appleButtonStyle)
+                                          .copyWith(
+                                              color: CustomColors
+                                                  .lightPrimaryText),
+                                      backgroundColor:
+                                          CustomColors.googleButton,
+                                      onTap: () async {
+                                        final provider =
+                                            context.read<AuthPageProvider>();
+                                        provider.updateLoading(true);
+                                        context
+                                            .read<AppAuthBloc>()
+                                            .add(PageOpenedEvent());
+                                        final GoogleSignInAccount? _userInfo =
+                                            await signInWithGoogle(provider);
 
-                                      if (_userInfo != null) {
-                                        context.read<AppAuthBloc>().add(
-                                              CheckUserEvent(
-                                                googleUser: _userInfo,
-                                                type: UserType.GOOGLE,
-                                              ),
-                                            );
-                                      }
-                                    },
-                                  ),
-                                  _customButton(
-                                    "Войти по логину",
-                                    textStyle: StyleTextCustom().setStyleByEnum(
-                                        context,
-                                        StyleTextEnum.appleButtonStyle),
-                                    backgroundColor: StyleColorCustom()
-                                        .setStyleByEnum(context,
-                                            StyleColorEnum.appleButtonColors),
-                                    border: true,
-                                    onTap: () =>
-                                        Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (context) => AuthBloc(),
-                                          child: const AuthPhone(),
-                                        ),
-                                      ),
+                                        if (_userInfo != null) {
+                                          context.read<AppAuthBloc>().add(
+                                                CheckUserEvent(
+                                                  googleUser: _userInfo,
+                                                  type: UserType.GOOGLE,
+                                                ),
+                                              );
+                                        }
+                                      },
                                     ),
                                   ),
-                                  _customButton(
-                                    "Забыли пароль?",
-                                    textStyle: StyleTextCustom()
-                                        .setStyleByEnum(context,
-                                            StyleTextEnum.appleButtonStyle)
-                                        .copyWith(
-                                            color: CustomColors.dotPinCode),
-                                    backgroundColor: Colors.transparent,
-                                    top: 24,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (context) =>
-                                              PasswordRestoreBloc(),
-                                          child: PasswordRestorePage(),
+                                  DownToUp(
+                                    delay: 2,
+                                    child: _customButton(
+                                      "Войти по логину",
+                                      textStyle: StyleTextCustom()
+                                          .setStyleByEnum(context,
+                                              StyleTextEnum.appleButtonStyle),
+                                      backgroundColor: StyleColorCustom()
+                                          .setStyleByEnum(context,
+                                              StyleColorEnum.appleButtonColors),
+                                      border: true,
+                                      onTap: () =>
+                                          Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider(
+                                            create: (context) =>
+                                                HomeScreenBloc(),
+                                            child: const HomeScreen(),
+                                          ),
+                                        ),
+                                        (route) => false,
+                                      ),
+                                      //     Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (_) => BlocProvider(
+                                      //       create: (context) => AuthBloc(),
+                                      //       child: const AuthPhone(),
+                                      //     ),
+                                      //   ),
+                                      // ),
+                                    ),
+                                  ),
+                                  DownToUp(
+                                    delay: 2.5,
+                                    child: _customButton(
+                                      "Забыли пароль?",
+                                      textStyle: StyleTextCustom()
+                                          .setStyleByEnum(context,
+                                              StyleTextEnum.appleButtonStyle)
+                                          .copyWith(
+                                              color: CustomColors.dotPinCode),
+                                      backgroundColor: Colors.transparent,
+                                      top: 24,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider(
+                                            create: (context) =>
+                                                PasswordRestoreBloc(),
+                                            child: PasswordRestorePage(),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -401,6 +428,7 @@ class _AppAuthPageState extends State<AppAuthPage> with WidgetsBindingObserver {
         message: "Unable to sign in, please try again!",
       ).then((value) => provider.updateLoading(false));
     }
+    return null;
   }
 }
 

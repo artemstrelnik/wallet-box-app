@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/core/constants/constants.dart';
 
 class SplashScreen extends StatelessWidget {

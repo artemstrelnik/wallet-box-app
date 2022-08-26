@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api.dart';

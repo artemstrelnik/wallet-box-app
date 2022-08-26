@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/api.dart';
 import 'package:wallet_box/app/data/net/interactors/currencies_interactor.dart';
@@ -8,7 +7,6 @@ import 'package:wallet_box/app/data/net/interactors/user_auth_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/user_by_id_interactor.dart';
 import 'package:wallet_box/app/data/net/interactors/user_update_info_interactor.dart';
 import 'package:wallet_box/app/data/net/models/currenci_model.dart';
-import 'package:wallet_box/app/data/net/models/groups_list_response.dart';
 import 'package:wallet_box/app/data/net/models/my_subscription_variable.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';

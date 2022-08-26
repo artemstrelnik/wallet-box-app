@@ -4,12 +4,10 @@ import 'dart:collection';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -49,9 +47,7 @@ import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_scr
 import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_screen_page.dart';
 import 'package:wallet_box/app/screens/tochka_webview/tochka_webview.dart';
 
-import '../../core/generals_widgets/customBottomSheet.dart';
 import '../../data/net/models/permission_role_provider.dart';
-import '../../data/net/models/user_auth_model.dart';
 import 'home_screen_bloc.dart';
 import 'home_screen_events.dart';
 import 'home_screen_states.dart';
@@ -276,7 +272,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       child: Column(
                         children: [
                           _billsListWidget(),
-                          DownToUp(delay: 2, child: _billAndCircleMiddleBody()),
                           DownToUp(delay: 2.5, child: _schemeWidget(context)),
                         ],
                       ),
@@ -460,60 +455,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           ),
         ),
       );
-
-  Padding _billAndCircleMiddleBody() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ContainerCustom(
-          child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Selector<UserNotifierProvider, User?>(
-              selector: (_, provider) => provider.user,
-              builder: (context, user, _) => Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        "Запланированный расход: ",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
-                      ),
-                      Text(
-                        "${user?.plannedSpend ?? 0}",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.titleCard),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Text(
-                        "Запланированный доход: ",
-                        style: StyleTextCustom()
-                            .setStyleByEnum(context, StyleTextEnum.bodyCard),
-                      ),
-                      Text("${user?.plannedEarn ?? 0}",
-                          style: StyleTextCustom().setStyleByEnum(
-                              context, StyleTextEnum.titleCard)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              CustomBottomSheet.customBottomSheet(context, _bottomSheet());
-            },
-            icon: Icon(CupertinoIcons.pen),
-          ),
-        ],
-      )),
-    );
-  }
 
   Widget _transactionListWidget() => ValueListenableBuilder(
         valueListenable: _transactionList,
@@ -2069,7 +2010,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
@@ -2309,203 +2250,4 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
           maxLines: 1,
         ),
       );
-
-  Column _bottomSheet() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CustomBottomSheet.topDividerBottomSheet(),
-        _bottomSheetButtons("Изменить запланированный расход", 0),
-        _bottomSheetButtons("Изменить запланированный доход", 1),
-        _bottomSheetButtons("Сбросить все", 2),
-        SizedBox(height: 50),
-      ],
-    );
-  }
-
-  Padding _bottomSheetButtons(
-    String text,
-    int index,
-  ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: MaterialButton(
-        color: _brightness != Brightness.light
-            ? CustomColors.darkSecondaryBackground.withOpacity(0.8)
-            : Colors.grey.shade100,
-        elevation: 1,
-        minWidth: double.infinity,
-        height: 50,
-        textColor: index != 2
-            ? _brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black
-            : Colors.red,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: index == 0 ? const Radius.circular(8) : Radius.zero,
-              bottom: index == 2 ? const Radius.circular(8) : Radius.zero,
-            ),
-            side: BorderSide(color: Colors.white.withOpacity(0.01))),
-        onPressed: () {
-          final _bloc = context.read<HomeScreenBloc>();
-          Navigator.pop(context);
-          if (index == 2) {
-            _bloc.add(UpdateSpendEarnEvent(plannedEarn: 0, plannedSpend: 0));
-          } else {
-            String header = index == 0
-                ? "Изменить запланированный расход"
-                : "Изменение запланированного дохода";
-            String description = index == 0
-                ? "Запланированный расход позволяет контролировать ваши операции по расходам. Для установки запланированного расхода введите сумму, которая будет означать ваш план по доходам на этот месяц."
-                : "Запланированный доход позволяет контролировать ваши операции по пополнению счетов. Для установки запланированного дохода введите сумму, которая будет означать ваш план по доходам на этот месяц.";
-
-            TextEditingController spendEarnController = TextEditingController();
-            Logger().w("message");
-
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: StyleColorCustom().setStyleByEnum(
-                context,
-                StyleColorEnum.secondaryBackground,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(10.0),
-                ),
-              ),
-              builder: (context) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: _bottomSheetWithCategory(
-                  index: index,
-                  header: header,
-                  description: description,
-                  controller: spendEarnController,
-                ),
-              ),
-            );
-          }
-        },
-        child: Row(
-          mainAxisAlignment: index == 2
-              ? MainAxisAlignment.center
-              : MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-                child: TextWidget(
-                    text: text,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                    align: TextAlign.center)),
-            index == 1
-                ? const Icon(
-                    Icons.arrow_drop_up_outlined,
-                    color: CustomColors.blue,
-                    size: 30,
-                  )
-                : index == 0
-                    ? const Icon(
-                        Icons.arrow_drop_down,
-                        color: CustomColors.pink,
-                        size: 30,
-                      )
-                    : SizedBox.shrink(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Column _bottomSheetWithCategory({
-    required int index,
-    required String header,
-    required String description,
-    required TextEditingController controller,
-  }) {
-    late int price;
-    Logger().i("message");
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Center(child: CustomBottomSheet.topDividerBottomSheet()),
-        Text(
-          header,
-          style: GoogleFonts.montserrat(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: _brightness == Brightness.dark ? Colors.white : Colors.black,
-          ),
-        ),
-        SizedBox(height: 30.0),
-        Text(
-          description,
-          style: GoogleFonts.montserrat(
-            fontSize: 13,
-            color: _brightness == Brightness.dark ? Colors.white : Colors.black,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-            top: 30.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: "Сумма",
-              hintStyle: TextStyle(fontSize: 13),
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(
-                vertical: 0,
-                horizontal: 10,
-              ),
-            ),
-            keyboardType: TextInputType.number,
-            style: TextStyle(
-              color:
-                  _brightness == Brightness.dark ? Colors.white : Colors.black,
-            ),
-          ),
-        ),
-        Visibility(
-          visible: MediaQuery.of(context).viewInsets.bottom == 0,
-          child: Column(
-            children: [
-              SizedBox(height: 30.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ButtonCancel(
-                    text: "Сбросить",
-                    onPressed: () {
-                      final _bloc = context.read<HomeScreenBloc>();
-                      index == 0
-                          ? _bloc.add(UpdateSpendEarnEvent(plannedSpend: 0))
-                          : _bloc.add(UpdateSpendEarnEvent(plannedEarn: 0));
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ButtonPink(
-                    text: "Сохранить",
-                    onPressed: () {
-                      final _bloc = context.read<HomeScreenBloc>();
-                      index == 0
-                          ? _bloc.add(UpdateSpendEarnEvent(
-                              plannedSpend: int.parse(controller.text)))
-                          : _bloc.add(UpdateSpendEarnEvent(
-                              plannedEarn: int.parse(controller.text)));
-
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 20.0),
-      ],
-    );
-  }
 }

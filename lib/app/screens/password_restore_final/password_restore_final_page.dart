@@ -62,8 +62,7 @@ class _PasswordRestoreFinalPageState extends State<PasswordRestoreFinalPage> {
   }
 
   Future<void> _showMyDialog(context,
-      {String? title,
-      required String message,
+      {required String message,
       required Function() onPress}) async {
     showCupertinoDialog<void>(
       context: context,

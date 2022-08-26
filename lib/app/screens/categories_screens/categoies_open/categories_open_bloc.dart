@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/data/net/interactors/transaction_interactor.dart';
 import 'package:wallet_box/app/data/net/models/categories_responce.dart';

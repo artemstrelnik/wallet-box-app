@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 import 'package:wallet_box/app/data/net/models/user_auth_model.dart';
 import 'package:wallet_box/app/data/net/models/user_registration_model.dart';
 
 import '../api.dart';
-import '../models/permission_role_provider.dart';
 
 class TransactionInteractor {
   Future<bool?> removeIntegration(

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:wallet_box/app/data/enum.dart';
 
 class UserAuthModel {

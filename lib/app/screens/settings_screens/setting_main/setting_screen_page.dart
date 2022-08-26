@@ -1,17 +1,17 @@
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/src/provider.dart';
 import 'package:random_password_generator/random_password_generator.dart';
+import 'package:screen_loader/screen_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallet_box/app/bloc/my_app_bloc.dart';
 import 'package:wallet_box/app/bloc/my_app_page.dart';
@@ -30,6 +30,7 @@ import 'package:wallet_box/app/core/themes/themes.dart';
 import 'package:wallet_box/app/data/enum.dart';
 import 'package:wallet_box/app/data/net/models/currenci_model.dart';
 import 'package:wallet_box/app/data/net/models/my_subscription_variable.dart';
+import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
 import 'package:wallet_box/app/screens/settings_screens/currencies_screens/currencies_screens.dart';
 import 'package:wallet_box/app/screens/settings_screens/currencies_screens/currencies_screens_bloc.dart';
 import 'package:wallet_box/app/screens/settings_screens/delete_data/delete_data.dart';
@@ -41,9 +42,6 @@ import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_scr
 import 'package:wallet_box/app/screens/settings_screens/setting_main/setting_screen_states.dart';
 import 'package:wallet_box/app/screens/settings_screens/subscription_screen/subscription_screen.dart';
 import 'package:wallet_box/app/screens/settings_screens/subscription_screen/subscription_screen_bloc.dart';
-import 'package:screen_loader/screen_loader.dart';
-import 'package:wallet_box/app/data/net/models/permission_role_provider.dart';
-import 'package:intl/intl.dart';
 
 enum _ScreenState {
   loading,
@@ -398,15 +396,21 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextWidget(
-                      padding: 0,
-                      text: _my.variant.name,
-                      style: StyleTextCustom()
-                          .setStyleByEnum(context, StyleTextEnum.bodyCard)),
+                    padding: 0,
+                    text: _my.variant.name,
+                    style: StyleTextCustom().setStyleByEnum(
+                      context,
+                      StyleTextEnum.bodyCard,
+                    ),
+                  ),
                   TextWidget(
-                      padding: 0,
-                      text: "Действует до " + _date,
-                      style: StyleTextCustom()
-                          .setStyleByEnum(context, StyleTextEnum.titleCard)),
+                    padding: 0,
+                    text: "Действует до " + _date,
+                    style: StyleTextCustom().setStyleByEnum(
+                      context,
+                      StyleTextEnum.titleCard,
+                    ),
+                  ),
                 ],
               );
             },
@@ -1079,5 +1083,6 @@ class _SettingScreenState extends State<SettingScreen> with ScreenLoader {
         message: "Unable to sign in, please try again!",
       );
     }
+    return null;
   }
 }

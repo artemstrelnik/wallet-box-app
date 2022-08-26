@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:wallet_box/app/core/constants/string.dart';
 import 'package:wallet_box/app/core/generals_widgets/button.dart';

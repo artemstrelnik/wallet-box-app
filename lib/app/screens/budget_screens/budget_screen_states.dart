@@ -1,5 +1,7 @@
 import 'package:wallet_box/app/data/net/models/transaction_by_category_id.dart';
 
+import '../../data/net/models/user_auth_model.dart';
+
 abstract class BudgetScreenState {
   const BudgetScreenState();
 }
@@ -34,4 +36,11 @@ class UpdateTransactionListState extends BudgetScreenState {
   final int index;
   final DateTime start;
   final List<Transaction> transaction;
+}
+
+
+class UpdateUserState extends BudgetScreenState {
+  final User user;
+
+  const UpdateUserState({required this.user});
 }
