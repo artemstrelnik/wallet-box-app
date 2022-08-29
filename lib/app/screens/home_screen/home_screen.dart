@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -1104,7 +1105,11 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                   },
                   child: Container(
                     padding: const EdgeInsets.only(
-                        top: 5, bottom: 10, right: 10, left: 10),
+                      top: 5,
+                      bottom: 10,
+                      right: 10,
+                      left: 10,
+                    ),
                     margin:
                         const EdgeInsets.only(top: 10, bottom: 5, right: 12),
                     width: 200,
@@ -1555,6 +1560,8 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
     sorted.forEach((key, value) {
       _cats.addAll(value);
     });
+    log(touchedIndex.toString());
+    log(_categories.values.toList().toString());
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -1576,6 +1583,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                             pieTouchResponse.touchedSection == null) {
                           return;
                         }
+                        log(pieTouchResponse.touchedSection.toString());
+                        log(pieTouchResponse.touchedSection!.touchedSectionIndex
+                            .toString());
                         touchedIndex = pieTouchResponse
                             .touchedSection!.touchedSectionIndex;
                       });
@@ -1608,7 +1618,7 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                       .setStyleByEnum(context, StyleTextEnum.titleCard),
                 ),
                 secondChild: Text(
-                  touchedIndex == -1
+                  touchedIndex == -1 || _categories.values.toList().isEmpty
                       ? ""
                       : _categories.values.toList()[touchedIndex].name,
                   style: StyleTextCustom()
@@ -1836,6 +1846,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                               );
                                         },
                                       );
+                                      setState(() {
+                                        touchedIndex = -1;
+                                      });
                                     },
                                     child: Icon(
                                       Icons.chevron_left_outlined,
@@ -1892,7 +1905,6 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                                       const Duration(
                                                           milliseconds: 500),
                                                       () {
-                                                    Logger().i("message0");
                                                     context
                                                         .read<HomeScreenBloc>()
                                                         .add(
@@ -1903,7 +1915,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                                                   _userProvider
                                                                       .isEarnActive),
                                                         );
-                                                    Logger().i("message");
+                                                  });
+                                                  setState(() {
+                                                    touchedIndex = -1;
                                                   });
                                                 },
                                                 child: Icon(
@@ -1911,9 +1925,9 @@ class _HomeScreenState extends State<HomeScreen> with ScreenLoader {
                                                   size: 40,
                                                   color: StyleColorCustom()
                                                       .setStyleByEnum(
-                                                          context,
-                                                          StyleColorEnum
-                                                              .colorIcon),
+                                                    context,
+                                                    StyleColorEnum.colorIcon,
+                                                  ),
                                                 ),
                                               )
                                             : Container(width: 40),
